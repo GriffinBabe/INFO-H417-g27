@@ -1,0 +1,19 @@
+# JetBrains project folder
+.idea/
+
+# Cmake build folders
+cmake-build-debug/
+cmake-build-release/
+debug/
+
+# The database folder (have to be put manually)
+database/
+
+# Binaries
+*.bin
+*.obj
+*.exe
+*.o
+*.lib
+*.dll
+*.so

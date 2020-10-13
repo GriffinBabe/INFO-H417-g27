@@ -1,0 +1,80 @@
+# Our style is based on LLVM
+BasedOnStyle: LLVM
+
+# Maximum 80 characters per line
+ColumnLimit: 80
+
+# 4 spaces for indentation
+IndentWidth: 4
+UseTab: Never
+
+# Always attach braces to surrounding context but break before function
+# definitions, and ‘else’.
+BreakBeforeBraces: Stroustrup
+
+AlignAfterOpenBracket: true
+AlignEscapedNewlinesLeft: true
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+
+# All arguments on the same line or each on a different line except if they
+# can all fit on the same line
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: false
+BinPackParameters: false
+
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: false
+IndentCaseLabels: false
+IndentWrappedFunctionNames: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# The maximum number of consecutive empty lines to keep.
+MaxEmptyLinesToKeep: 1
+
+NamespaceIndentation: None
+PointerAlignment: Left
+
+# Insert a space after C style cast but not in the parentheses
+# Example: "(int) x" is valid but not "( int )x"
+SpaceAfterCStyleCast: true
+SpacesInCStyleCastParentheses: false
+
+# Put a space before opening parentheses only after control statement keywords
+# (for/if/while...)
+SpaceBeforeParens: ControlStatements
+
+# No spaces inside () (even if empty content) and []
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Do not split the comments starting with " defined"
+CommentPragmas: "^ defined"
+
+#
+# C++ specific
+#
+
+# Offset for access modifiers (e.g. "public:")
+AccessModifierOffset: -4
+
+# If the constructor initializers don’t fit on a line, put each initializer
+# on its own line.
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
+Cpp11BracedListStyle: true
+
+# Indent only in inner namespaces (nested in other namespaces).
+NamespaceIndentation: Inner
+
+# If true, spaces will be inserted after ‘<’ and before ‘>’ in template argument
+# lists
+SpacesInAngles: false
+
+# Use features of C++11 (e.g. A<A<int>> instead of A<A<int> >).
+Standard: Cpp11
