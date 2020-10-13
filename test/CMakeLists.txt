@@ -1,6 +1,6 @@
 add_executable(
-    test_stream
-    stream/test_stream.cpp
+    example_test
+    example_test.cpp
 )
 
-target_link_libraries(test_stream ${Boost_LIBRARIES} GTest::Main)
+target_link_libraries(example_test ${Boost_LIBRARIES} GTest::Main)

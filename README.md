@@ -13,6 +13,7 @@ Required libraries and tools (can be installed with apt-get on ubuntu):
 
 - build-essential (need to support c++17)
 - cmake
+- libgtest-dev
 - libboost-all-dev
 - clang-format-10
 
