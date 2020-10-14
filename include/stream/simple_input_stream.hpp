@@ -3,18 +3,21 @@
 namespace io {
 class SimpleInputStream : public InputStream {
 public:
-    SimpleInputStream() = default;
+    SimpleInputStream();
     ~SimpleInputStream();
+
+    SimpleInputStream(std::uint16_t buffer_size);
 
     virtual bool open(std::string const& file) override;
 
-    virtual std::shared_ptr<char[]> readln() override;
+    virtual std::string readln() override;
 
     virtual bool seek(std::uint32_t pos) override;
 
     [[nodiscard]] virtual bool end_of_stream() const override;
 
 private:
+
     /**
      * File descriptor.
      */
@@ -23,6 +26,6 @@ private:
     /**
      * The base size allocation for the buffer in the read() function.
      */
-    std::uint16_t buffer_size;
+    std::uint16_t _buffer_size;
 };
 } // namespace io
