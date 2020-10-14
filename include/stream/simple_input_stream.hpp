@@ -1,3 +1,4 @@
+#pragma once
 #include "input_stream.hpp"
 
 namespace io {
@@ -17,7 +18,6 @@ public:
     [[nodiscard]] virtual bool end_of_stream() const override;
 
 private:
-
     /**
      * File descriptor.
      */
@@ -27,5 +27,10 @@ private:
      * The base size allocation for the buffer in the read() function.
      */
     std::uint16_t _buffer_size;
+
+    /**
+     * Tracks if the file is open or not.
+     */
+    bool _file_open = false;
 };
 } // namespace io

@@ -21,12 +21,17 @@ bool io::SimpleInputStream::open(const std::string& file)
     if (_file == nullptr) {
         return false;
     }
+    _file_open = true;
     // sets the cursor at the begin of the file.
     return fseek(_file, 0, SEEK_SET);
 }
 
 std::string io::SimpleInputStream::readln()
 {
+    if (_file_open) {
+        throw std::runtime_error(
+            "Tried to perform line read but the file is not opened yet.");
+    }
     // simple character buffer
     std::vector<char> characters;
     characters.reserve(_buffer_size);
@@ -45,10 +50,16 @@ std::string io::SimpleInputStream::readln()
 
 bool io::SimpleInputStream::seek(std::uint32_t pos)
 {
+    if (!_file_open) {
+        return false;
+    }
     return fseek(_file, pos, SEEK_SET);
 }
 
 bool io::SimpleInputStream::end_of_stream() const
 {
+    if (!_file_open) {
+        return false;
+    }
     return feof(_file);
 }
