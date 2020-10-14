@@ -22,7 +22,7 @@ public:
      * @return a smart pointer to the read char array.
      * @throws std::runtime_error if the file hasn't been initialized yet.
      */
-    virtual std::shared_ptr<char[]> readln() = 0;
+    virtual std::shared_ptr<char> readln() = 0;
 
     /**
      * Moves the file cursor to a certain position, so the next readln reads
