@@ -23,7 +23,7 @@ public:
      * @param string, the string to write.
      * @return true if the line has been wrote successfully, false otherwise.
      */
-    virtual bool writeln(std::shared_ptr<char> string) = 0;
+    virtual bool writeln(std::string str) = 0;
 
     /**
      * Closes the opened file.
