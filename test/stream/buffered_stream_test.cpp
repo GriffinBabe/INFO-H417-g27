@@ -1,10 +1,9 @@
-#include <gtest/gtest.h>
+#include "resources_config.hpp"
 #include "stream/buffered_input_stream.hpp"
 #include "stream/buffered_output_stream.hpp"
-#include "resources_config.hpp"
+#include <gtest/gtest.h>
 
-class TestBufferedInputStream : public ::testing::Test
-{
+class TestBufferedInputStream : public ::testing::Test {
 protected:
     void SetUp() override;
     void TearDown() override;
@@ -20,7 +19,6 @@ void TestBufferedInputStream::SetUp()
 void TestBufferedInputStream::TearDown()
 {
 }
-
 
 //----------------------------------------------
 // INPUT TEST
@@ -97,4 +95,3 @@ TEST_F(TestBufferedInputStream, test_read_full)
     std::cout << "Read: " << lines.size() << " lines." << std::endl;
     ASSERT_EQ(lines.size(), 234997);
 }
-
