@@ -5,7 +5,8 @@ namespace io {
 class SimpleInputStream : public InputStream {
 public:
     SimpleInputStream() = default;
-    ~SimpleInputStream();
+
+    virtual ~SimpleInputStream();
 
     SimpleInputStream(std::uint16_t buffer_size);
 

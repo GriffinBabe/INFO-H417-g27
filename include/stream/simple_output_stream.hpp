@@ -6,7 +6,7 @@ class SimpleOutputStream : public OutputStream {
 public:
     SimpleOutputStream() = default;
 
-    ~SimpleOutputStream();
+    virtual ~SimpleOutputStream();
 
     SimpleOutputStream(std::uint16_t buffer_size);
 

@@ -12,6 +12,11 @@ class OutputStream {
 public:
 
     /**
+     * Virtual destructor that will be overridden by child classes.
+     */
+    virtual ~OutputStream();
+
+    /**
      * Creates a new file at the given path.
      * @param path, the path were to create the file.
      * @return true if the file was created successfully, false otherwise.
