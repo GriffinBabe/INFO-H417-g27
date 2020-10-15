@@ -38,23 +38,26 @@ bool io::SimpleOutputStream::writeln(std::string str)
     }
     // iterates over the string and writes character by character
     auto str_iterator = str.begin();
-    while (++str_iterator != str.end()) {
+    while (str_iterator != str.end()) {
         if (fwrite(&*str_iterator, sizeof(char), 1, _file) != 1) {
             return false;
         }
+        str_iterator++;
     }
-    // terminates with a new line character
-    const char new_line = '\n';
-    if (fwrite(&new_line, sizeof(char), 1, _file) != 1)
-        return false;
+    if (str.back() != '\n') {
+        // terminates with a new line character
+        const char new_line = '\n';
+        if (fwrite(&new_line, sizeof(char), 1, _file) != 1)
+            return false;
+    }
     return true;
 }
 
 bool io::SimpleOutputStream::close()
 {
     if (!_file_open) {
-        std::cout << "File is already closed." << std::endl;
-        return false;
+        std::cout << "Warning: File is already closed." << std::endl;
+        return true;
     }
     int ret_status = fclose(_file);
     if (ret_status == 0) {

@@ -48,7 +48,7 @@ void TestSimpleOutputStream::TearDown()
 }
 
 //----------------------------------------------
-// TEST CLASSES
+// INPUT TEST CLASSES
 //----------------------------------------------
 
 TEST_F(TestSimpleInputStream, test_no_open)
@@ -121,4 +121,46 @@ TEST_F(TestSimpleInputStream, test_read_full)
 
     std::cout << "Read: " << lines.size() << " lines." << std::endl;
     ASSERT_EQ(lines.size(), 234997);
+}
+
+//----------------------------------------------
+// OUTPUT TEST CLASSES
+//----------------------------------------------
+
+TEST_F(TestSimpleOutputStream, test_no_open)
+{
+    std::unique_ptr<io::OutputStream> stream =
+        std::make_unique<io::SimpleOutputStream>();
+}
+
+TEST_F(TestSimpleOutputStream, test_good_file)
+{
+    std::unique_ptr<io::OutputStream> stream =
+        std::make_unique<io::SimpleOutputStream>();
+
+    ASSERT_TRUE(stream->create(output_file_path));
+
+    // BEWARE: End of line character is added in the function
+    std::string example_line = "Hello Brussels!";
+    ASSERT_TRUE(stream->writeln(example_line));
+
+    ASSERT_TRUE(stream->close());
+    ASSERT_TRUE(stream->close()); // should emit a warning
+}
+
+TEST_F(TestSimpleOutputStream, test_write_on_closed)
+{
+    std::unique_ptr<io::OutputStream> stream =
+        std::make_unique<io::SimpleOutputStream>();
+
+    std::string example_line = "Hello Brussels!";
+
+    ASSERT_FALSE(stream->writeln(example_line));
+    ASSERT_TRUE(stream->close()); // emits warning
+
+    ASSERT_TRUE(stream->create(output_file_path));
+    ASSERT_TRUE(stream->writeln(example_line));
+    ASSERT_TRUE(stream->writeln(example_line));
+
+    ASSERT_TRUE(stream->close());
 }
