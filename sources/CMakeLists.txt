@@ -8,6 +8,8 @@ add_library(
         stream/output_stream.cpp
         stream/simple_input_stream.cpp
         stream/simple_output_stream.cpp
+        stream/buffered_input_stream.cpp
+        stream/buffered_output_stream.cpp
 )
 
 target_link_libraries(streams PUBLIC ${Boost_LIBRARIES}) # links boost libraries

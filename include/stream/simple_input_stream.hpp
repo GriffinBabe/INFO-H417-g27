@@ -1,14 +1,14 @@
 #pragma once
-#include "input_stream.hpp"
+#include "stream/input_stream.hpp"
 
 namespace io {
 class SimpleInputStream : public InputStream {
 public:
     SimpleInputStream() = default;
 
-    virtual ~SimpleInputStream();
-
     SimpleInputStream(std::uint16_t buffer_size);
+
+    virtual ~SimpleInputStream();
 
     virtual bool open(std::string const& file) override;
 
