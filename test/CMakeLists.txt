@@ -10,5 +10,13 @@ add_executable(
 )
 target_link_libraries(simple_stream_test streams GTest::Main)
 
+add_executable(
+    buffered_stream_test
+    stream/buffered_stream_test.cpp
+)
+target_link_libraries(buffered_stream_test streams GTest::Main)
+
 gtest_discover_tests(example_test)
 gtest_discover_tests(simple_stream_test)
+gtest_discover_tests(buffered_stream_test)
+

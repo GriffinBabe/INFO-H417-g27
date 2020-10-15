@@ -46,15 +46,16 @@ std::string io::BufferedInputStream::readln()
     do {
         local_buf = _reader.read();
         characters.push_back(local_buf);
-    } while (local_buf == '\n' || local_buf == '\0');
+    } while (local_buf != '\n' && local_buf != '\0');
 
     return std::string(characters.begin(), characters.end());
 }
 
 bool io::BufferedInputStream::seek(std::uint32_t pos)
 {
-    fseek(_file, pos, SEEK_SET);
+    int ret_value = fseek(_file, pos, SEEK_SET);
     _reader.reset();
+    return ret_value == 0;
 }
 
 bool io::BufferedInputStream::end_of_stream() const
@@ -95,7 +96,7 @@ bool io::BufferedInputStream::BufferReader::reset()
 {
     _cursor = 0;
     _cur_read = fread(_ptr.get(), sizeof(char), _read_size, _file);
-    return (_cur_read >= _read_size);
+    return (_cur_read < _read_size);
 }
 
 bool io::BufferedInputStream::BufferReader::eof() const
