@@ -15,7 +15,7 @@ protected:
     void TearDown() override;
 
     const std::string company_name_path =
-        std::string(RESOURCES_DIR) + "company_name.csv";
+        std::string(RESOURCES_DIR) + "/company_name.csv";
 };
 
 void TestSimpleInputStream::SetUp()
@@ -36,7 +36,7 @@ protected:
     void TearDown() override;
 
     const std::string output_file_path =
-        std::string(OUTPUT_DIR) + "output_1.txt";
+        std::string(OUTPUT_DIR) + "/output_1.txt";
 };
 
 void TestSimpleOutputStream::SetUp()
@@ -51,6 +51,14 @@ void TestSimpleOutputStream::TearDown()
 // TEST CLASSES
 //----------------------------------------------
 
+TEST_F(TestSimpleInputStream, test_no_open)
+{
+    std::unique_ptr<io::InputStream> stream =
+        std::make_unique<io::SimpleInputStream>();
+
+    // the stream closes in it's destructor but no files has been opened yet
+}
+
 TEST_F(TestSimpleInputStream, test_wrong_file)
 {
     // here we use a pointer instead of a local object
@@ -64,9 +72,53 @@ TEST_F(TestSimpleInputStream, test_wrong_file)
         std::make_unique<io::SimpleInputStream>();
 
     const std::string wrong_path =
-        std::string(RESOURCES_DIR) + "unexisting_file.csv";
+        std::string(RESOURCES_DIR) + "/unexisting_file.csv";
     const std::string malformed_path = "*what_the_f^/hello/file.csv";
 
     ASSERT_FALSE(stream->open(wrong_path));
     ASSERT_FALSE(stream->open(malformed_path));
+}
+
+TEST_F(TestSimpleInputStream, test_good_file)
+{
+    std::unique_ptr<io::InputStream> stream =
+        std::make_unique<io::SimpleInputStream>();
+
+    ASSERT_TRUE(stream->open(company_name_path));
+
+    std::string line = stream->readln();
+    ASSERT_NE(line.size(), 0);
+}
+
+TEST_F(TestSimpleInputStream, test_read_on_closed)
+{
+    std::unique_ptr<io::InputStream> stream =
+        std::make_unique<io::SimpleInputStream>();
+
+    try {
+        stream->readln();
+        FAIL();
+    }
+    catch (std::runtime_error const& err) {
+        SUCCEED();
+    }
+}
+
+TEST_F(TestSimpleInputStream, test_read_full)
+{
+    std::vector<std::string> lines;
+
+    std::unique_ptr<io::InputStream> stream =
+        std::make_unique<io::SimpleInputStream>();
+
+    ASSERT_TRUE(stream->open(company_name_path));
+
+    while (!stream->end_of_stream()) {
+        std::string line = stream->readln();
+        if (line.size() != 0)
+            lines.push_back(line);
+    }
+
+    std::cout << "Read: " << lines.size() << " lines." << std::endl;
+    ASSERT_EQ(lines.size(), 234997);
 }

@@ -10,9 +10,6 @@ io::SimpleInputStream::SimpleInputStream(std::uint16_t buffer_size)
 io::SimpleInputStream::~SimpleInputStream()
 {
     if (_file_open) {
-        std::cout << "Warning: SimpleOutputStream destroyed without closing "
-                     "the file manually"
-                  << std::endl;
         int ret_status = fclose(_file);
         if (ret_status != 0) {
             std::cerr
@@ -35,7 +32,7 @@ bool io::SimpleInputStream::open(const std::string& file)
 
 std::string io::SimpleInputStream::readln()
 {
-    if (_file_open) {
+    if (!_file_open) {
         throw std::runtime_error(
             "Tried to perform line read but the file is not opened yet.");
     }
