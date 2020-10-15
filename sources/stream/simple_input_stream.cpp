@@ -1,9 +1,6 @@
 #include "stream/simple_input_stream.hpp"
+#include <iostream>
 #include <vector>
-
-io::SimpleInputStream::SimpleInputStream() : _buffer_size(10)
-{
-}
 
 io::SimpleInputStream::SimpleInputStream(std::uint16_t buffer_size)
     : _buffer_size(buffer_size)
@@ -12,7 +9,17 @@ io::SimpleInputStream::SimpleInputStream(std::uint16_t buffer_size)
 
 io::SimpleInputStream::~SimpleInputStream()
 {
-    fclose(_file);
+    if (_file_open) {
+        std::cout << "Warning: SimpleOutputStream destroyed without closing "
+                     "the file manually"
+                  << std::endl;
+        int ret_status = fclose(_file);
+        if (ret_status != 0) {
+            std::cerr
+                << "Error: couldn't close file in SimpleOutputStream destructor"
+                << std::endl;
+        }
+    }
 }
 
 bool io::SimpleInputStream::open(const std::string& file)
@@ -23,7 +30,7 @@ bool io::SimpleInputStream::open(const std::string& file)
     }
     _file_open = true;
     // sets the cursor at the begin of the file.
-    return fseek(_file, 0, SEEK_SET);
+    return fseek(_file, 0, SEEK_SET) == 0;
 }
 
 std::string io::SimpleInputStream::readln()
@@ -38,7 +45,7 @@ std::string io::SimpleInputStream::readln()
 
     char buffer;
 
-    while (fread(&buffer, sizeof(char), 1, _file) != NULL) {
+    while (fread(&buffer, sizeof(char), 1, _file) == 1) {
         if (buffer == '\n') {
             break;
         }
