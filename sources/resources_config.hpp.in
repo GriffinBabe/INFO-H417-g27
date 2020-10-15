@@ -1,0 +1,2 @@
+#cmakedefine RESOURCES_DIR "@RESOURCES_DIR@"
+#cmakedefine OUTPUT_DIR "@OUTPUT_DIR@"
