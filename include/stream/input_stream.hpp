@@ -10,6 +10,12 @@ namespace io {
  */
 class InputStream {
 public:
+
+    /**
+    * Virtual destructor that will be overridden by child classes.
+    */
+    virtual ~InputStream();
+
     /**
      * Opens a file at the given path.
      * @param file, the path to the file to read.
