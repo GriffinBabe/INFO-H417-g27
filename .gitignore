@@ -10,6 +10,7 @@ build/
 
 # The database folder (have to be put manually)
 database/
+output/
 
 # Binaries
 *.bin
