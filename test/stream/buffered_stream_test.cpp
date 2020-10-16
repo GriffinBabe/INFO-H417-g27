@@ -82,13 +82,13 @@ TEST_F(TestBufferedInputStream, test_read_full)
     std::vector<std::string> lines;
 
     std::unique_ptr<io::InputStream> stream =
-        std::make_unique<io::BufferedInputStream>(100, 10);
+        std::make_unique<io::BufferedInputStream>(1000, 100);
 
     ASSERT_TRUE(stream->open(company_name_path));
 
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
-        if (line.size() != 0)
+        if (!line.empty())
             lines.push_back(line);
     }
 

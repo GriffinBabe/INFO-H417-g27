@@ -43,10 +43,13 @@ std::string io::BufferedInputStream::readln()
     // local buffer not to mix with _buffer
     char local_buf;
 
-    do {
+    while (true) {
         local_buf = _reader.read();
+        if (local_buf == '\n' || local_buf == '\0') {
+            break;
+        }
         characters.push_back(local_buf);
-    } while (local_buf != '\n' && local_buf != '\0');
+    };
 
     return std::string(characters.begin(), characters.end());
 }
@@ -79,8 +82,7 @@ io::BufferedInputStream::BufferReader::BufferReader(FILE* file,
 
 char io::BufferedInputStream::BufferReader::read()
 {
-    assert(_file != nullptr);
-    if (_cursor > _cur_read) {
+    if (_cursor > _cur_read - 1) {
         if (!_eof_reached) {
             _eof_reached = reset();
         }
