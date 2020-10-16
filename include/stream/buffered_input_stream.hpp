@@ -1,5 +1,6 @@
 #pragma once
 #include "stream/input_stream.hpp"
+#include "stream/string_buffer.hpp"
 
 namespace io {
 class BufferedInputStream : public InputStream {
@@ -83,6 +84,11 @@ private:
          */
         bool _eof = false;
     };
+
+    /**
+     * The string buffer used in the readln() function.
+     */
+    util::StringBuffer _buffer;
 
     /**
      * Our encapsulated reader object.

@@ -1,11 +1,13 @@
 #include "stream/buffered_input_stream.hpp"
 #include <iostream>
-#include <vector>
+#include <sstream>
 
 io::BufferedInputStream::BufferedInputStream(std::uint16_t read_size,
                                              std::uint16_t buffer_size)
     : _buffer_size(buffer_size), _read_size(read_size)
 {
+    _buffer = util::StringBuffer(_buffer_size);
+    _buffer.reset();
 }
 
 io::BufferedInputStream::~BufferedInputStream()
@@ -37,8 +39,7 @@ std::string io::BufferedInputStream::readln()
         throw std::runtime_error(
             "Tried to perform line read but the file is not opened yet.");
     }
-    std::vector<char> characters;
-    characters.reserve(_buffer_size);
+    _buffer.reset();
 
     // local buffer not to mix with _buffer
     char local_buf;
@@ -48,10 +49,10 @@ std::string io::BufferedInputStream::readln()
         if (local_buf == '\n' || local_buf == '\0') {
             break;
         }
-        characters.push_back(local_buf);
+        _buffer.add(local_buf);
     };
 
-    return std::string(characters.begin(), characters.end());
+    return _buffer.get();
 }
 
 bool io::BufferedInputStream::seek(std::uint32_t pos)

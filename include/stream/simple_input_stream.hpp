@@ -1,5 +1,6 @@
 #pragma once
 #include "stream/input_stream.hpp"
+#include "stream/string_buffer.hpp"
 
 namespace io {
 class SimpleInputStream : public InputStream {
@@ -19,6 +20,12 @@ public:
     [[nodiscard]] virtual bool end_of_stream() const override;
 
 private:
+
+    /**
+     * The string buffer used in the readln() function.
+     */
+    util::StringBuffer _buffer;
+
     /**
      * File descriptor.
      */

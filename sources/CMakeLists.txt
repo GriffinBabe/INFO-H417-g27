@@ -4,6 +4,7 @@
 # The library is also a "target" in cmake
 add_library(
         streams SHARED
+        stream/string_buffer.cpp
         stream/input_stream.cpp
         stream/output_stream.cpp
         stream/simple_input_stream.cpp

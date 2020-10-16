@@ -5,6 +5,7 @@
 io::SimpleInputStream::SimpleInputStream(std::uint16_t buffer_size)
     : _buffer_size(buffer_size)
 {
+    _buffer = util::StringBuffer(_buffer_size);
 }
 
 io::SimpleInputStream::~SimpleInputStream()
@@ -37,19 +38,17 @@ std::string io::SimpleInputStream::readln()
             "Tried to perform line read but the file is not opened yet.");
     }
     // simple character buffer
-    std::vector<char> characters;
-    characters.reserve(_buffer_size);
+    _buffer.reset();
 
-    char buffer;
+    char local_buf;
 
-    while (fread(&buffer, sizeof(char), 1, _file) == 1) {
-        if (buffer == '\n') {
+    while (fread(&local_buf, sizeof(char), 1, _file) == 1) {
+        if (local_buf == '\n') {
             break;
         }
-        characters.push_back(buffer);
+        _buffer.add(local_buf);
     }
-    std::string line(characters.begin(), characters.end());
-    return line;
+    return _buffer.get();
 }
 
 bool io::SimpleInputStream::seek(std::uint32_t pos)
