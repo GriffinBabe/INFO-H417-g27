@@ -124,7 +124,7 @@ TEST_F(TestSimpleInputStream, test_read_full)
 }
 
 //----------------------------------------------
-// OUTPUT TEST CLASSES
+// OUTPUT TEST
 //----------------------------------------------
 
 TEST_F(TestSimpleOutputStream, test_no_open)

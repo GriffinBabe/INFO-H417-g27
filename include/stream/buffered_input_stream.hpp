@@ -21,7 +21,7 @@ public:
 
 private:
     /**
-     * Character buffer wrapper.
+     * Character read buffer wrapper.
      */
     class BufferReader {
     public:
