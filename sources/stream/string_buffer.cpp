@@ -1,4 +1,5 @@
 #include "stream/string_buffer.hpp"
+#include <cstring>
 
 util::StringBuffer::StringBuffer(std::uint32_t _base_allocation)
     : _allocated_size(_base_allocation)

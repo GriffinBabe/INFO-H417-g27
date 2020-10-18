@@ -1,5 +1,6 @@
 #include "stream/buffered_output_stream.hpp"
 #include <iostream>
+#include <assert.h>
 
 io::BufferedOutputStream::~BufferedOutputStream()
 {
