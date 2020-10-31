@@ -1,17 +1,18 @@
 #pragma once
+#include <filesystem>
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include "stream/input_stream.hpp"
 
 namespace bip = boost::interprocess;
+namespace sfs = std::filesystem;
 
 namespace io {
 class MMapInputStream: public InputStream {
 public:
     MMapInputStream() = default;
 
-    MMapInputStream(std::uint16_t read_size = 10,
-                    std::uint16_t buffer_size = 10);
+    MMapInputStream(std::uint16_t mapping_size = 10);
 
     virtual ~MMapInputStream();
 
@@ -24,11 +25,167 @@ public:
     [[nodiscard]] virtual bool end_of_stream() const = 0;
 
 private:
-    bip::file_mapping _mapped_file;
-    bip::mapped_region _mapped_region;
+    class MappingHandler {
+    public:
+        MappingHandler() = default;
+
+        MappingHandler(std::string& file,
+                       std::uint16_t mapping_size = 10);
+
+        /**
+         * Map the next region of the file.
+         * @return bool, if the next mapping was successful
+         */
+        bool next_mapping();
+
+        /**
+         * Map a region using the given offset
+         * @param offset to use
+         * @return bool, if the remap was successful
+         */
+         bool remap(uintmax_t offset);
+
+        /**
+         * Remap a region as done during the first initialisation.
+         */
+        void reset();
+
+        /**
+         * Read until the first instance of a character from the given position.
+         * @param c, char to search
+         * @return bool, if the char was found
+         */
+        bool read_until_char(char c);
+
+        /**
+         * Return content stored in the char array _content.
+         * Content is mainly fed using read_until_char method.
+         * @return characters stored in _content char array
+         */
+        const char* get_content();
+
+        /**
+         * Reset the _content array.
+         */
+        void reset_content();
+
+        /**
+         * Indicate if reached end of stream.
+         * @return bool, yes or no to the question: is end of stream reached?
+         */
+         [[nodiscard]] bool eof() const;
+
+    private:
+        /**
+         * Name of the file to map.
+         */
+        const char* _file_name;
+
+        /**
+         * Size of the file.
+         */
+        uintmax_t _file_size = 0;
+
+        /**
+         * Actual offset in the content of the file
+         */
+        uintmax_t _actual_offset = 0;
+
+        /**
+         * Size of the file to map in memory.
+         */
+        std::uint16_t _mapping_size = 10;
+
+        /**
+        * Current read position in the mapped region.
+        */
+        std::uint16_t _cursor = 0;
+
+        /**
+         * Indicate if a remap will be necessary
+         */
+         bool _need_remap = false;
 
 
-    std::uint16_t _read_size = 10;
-    std::uint16_t _buffer_size = 10;
+        /**
+         * Mode of interaction with the mapped file.
+         */
+        bip::mode_t _mode = bip::read_only;
+
+        /**
+         * Wraps a file-mapping used to create mapped regions
+         * from the file to map
+         */
+        bip::file_mapping _mapped_file;
+
+        /**
+         * Part/region of the file-mapping to mapped into memory.
+         */
+        bip::mapped_region _mapped_region;
+
+        /**
+         * Real size of the mapped region
+         */
+        std::size_t _mapped_size;
+
+        /**
+         * Starting address of the region.
+         */
+        char* _address;
+
+        /**
+         * Size of pages.
+         */
+        std::size_t _page_size;
+
+        /**
+         * Indicate if end of stream is reached.
+         */
+         bool _eof = false;
+
+        /**
+         * Content read from _mapped_region, with size _read_size.
+         * Mainly fed using read_until_char method.
+         */
+        char _content[];
+    };
+
+//    class MappingReader {
+//    public:
+//        MappingReader() = default;
+//
+//        MappingReader(std::string file,
+//                      std::uint16_t read_size = 10,
+//                      std::uint16_t mapping_size = 10);
+//
+//        bool read(char c);
+//
+//        void reset();
+//
+//    private:
+//
+//        MappingHandler _mapping_handler;
+//
+//        sfs::path _file_path;
+//        uintmax_t _file_size = 0;
+//
+//        uintmax_t _reversed_offset = 0;
+//
+//    };
+
+    /**
+     * Size of the mapping to perform.
+     */
+    std::uint16_t _mapping_size = 10;
+
+    /**
+     * Name of the file to map and to read from.
+     */
+    std::string _file_name;
+
+    /**
+     * Object handling the mapping and reading procedures.
+     */
+    MappingHandler _mapping_handler;
 };
 }
