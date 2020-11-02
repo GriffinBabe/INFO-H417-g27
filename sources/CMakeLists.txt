@@ -6,7 +6,7 @@ add_library(
         streams SHARED
         stream/input_stream.cpp
         stream/output_stream.cpp
-)
+        stream/input_stdio_stream.cpp ../include/stream/input_stdio_stream.hpp stream/ouput_stdio_stream.cpp ../include/stream/ouput_stdio_stream.hpp)
 
 target_link_libraries(streams PUBLIC ${Boost_LIBRARIES}) # links boost libraries
 
