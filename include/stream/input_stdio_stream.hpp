@@ -1,5 +1,6 @@
 #include "input_stream.hpp"
 #include<stdio.h>
+#include <iostream>
 
 namespace io {
 class StdioInputStream: public InputStream {
@@ -23,14 +24,15 @@ private:
     FILE* _file = nullptr;
 
     /**
-     * The base size allocation for the buffer in the read() function.
+     * Store input string
      */
-    std::uint16_t _buffer_size = 10;
+    char str [100];
 
     /**
      * Tracks if the file is open or not.
      */
     bool _file_open = false;
+
 };
 }
 
