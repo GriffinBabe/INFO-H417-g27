@@ -12,9 +12,9 @@ class MMapInputStream: public InputStream {
 public:
     MMapInputStream() = default;
 
-    MMapInputStream(std::uint16_t mapping_size = 10);
-
     virtual ~MMapInputStream();
+
+    MMapInputStream(std::uint16_t mapping_size = 10);
 
     virtual bool open(std::string const& file) override;
 
@@ -22,7 +22,7 @@ public:
 
     virtual bool seek(std::uint32_t pos) override;
 
-    [[nodiscard]] virtual bool end_of_stream() const = 0;
+    [[nodiscard]] virtual bool end_of_stream() const override;
 
 private:
     class MappingHandler {
@@ -44,6 +44,11 @@ private:
          * @return bool, if the remap was successful
          */
          bool remap(uintmax_t offset);
+
+        /**
+         * Reset variables to initial values.
+         */
+        void reset_vars();
 
         /**
          * Remap a region as done during the first initialisation.
@@ -149,29 +154,6 @@ private:
          */
         char _content[];
     };
-
-//    class MappingReader {
-//    public:
-//        MappingReader() = default;
-//
-//        MappingReader(std::string file,
-//                      std::uint16_t read_size = 10,
-//                      std::uint16_t mapping_size = 10);
-//
-//        bool read(char c);
-//
-//        void reset();
-//
-//    private:
-//
-//        MappingHandler _mapping_handler;
-//
-//        sfs::path _file_path;
-//        uintmax_t _file_size = 0;
-//
-//        uintmax_t _reversed_offset = 0;
-//
-//    };
 
     /**
      * Size of the mapping to perform.

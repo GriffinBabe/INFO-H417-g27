@@ -6,9 +6,7 @@ io::MMapInputStream::MMapInputStream(std::uint16_t mapping_size)
 {}
 
 io::MMapInputStream::~MMapInputStream()
-{
-    // TODO
-}
+{}
 
 bool io::MMapInputStream::open(std::string const& file)
 {
@@ -46,14 +44,8 @@ io::MMapInputStream::MappingHandler::MappingHandler(std::string& file,
 {
     _file_size = sfs::file_size(_file_name);
     _mapped_file = bip::file_mapping(_file_name, _mode);
-    _mapped_region = bip::mapped_region(_mapped_file,
-                                        _mode,
-                                        0,
-                                        _mapping_size);
+    reset();
     _page_size = _mapped_region.get_page_size();
-    _address = static_cast<char*>(_mapped_region.get_address());
-    _mapped_size = _mapped_region.get_size();
-    _content[_mapping_size+1] = {'\0'};
 }
 
 bool io::MMapInputStream::MappingHandler::next_mapping()
@@ -67,12 +59,14 @@ bool io::MMapInputStream::MappingHandler::remap(uintmax_t offset)
     {
         _cursor = 0;
         _actual_offset = offset;
-        _mapped_region = bip::mapped_region(_mapped_region,
+        _mapped_region = bip::mapped_region(_mapped_file,
                                             _mode,
                                             _actual_offset,
                                             _mapping_size);
         _address = static_cast<char*>(_mapped_region.get_address());
         _mapped_size = _mapped_region.get_size();
+        reset_content();
+        _need_remap = false;
         _eof = false;
         return EXIT_SUCCESS;
     }
@@ -83,17 +77,24 @@ bool io::MMapInputStream::MappingHandler::remap(uintmax_t offset)
     }
 }
 
-void io::MMapInputStream::MappingHandler::reset()
+void io::MMapInputStream::MappingHandler::reset_vars()
 {
     _actual_offset = 0;
     _cursor = 0;
+    _need_remap = false;
+    _eof = false;
+    reset_content();
+}
+
+void io::MMapInputStream::MappingHandler::reset()
+{
+    reset_vars();
     _mapped_region = bip::mapped_region(_mapped_file,
                                         _mode,
                                         _actual_offset,
                                         _mapping_size);
     _address = static_cast<char*>(_mapped_region.get_address());
     _mapped_size = _mapped_region.get_size();
-    _eof = false;
 }
 
 
@@ -140,7 +141,15 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         }
     } while (!first_pass);
 
-    const int end_cursor = char_ptr - _address;
+    int end_cursor = char_ptr - _address;
+
+    // In case found the character outside the _mapped_region (page alignment)
+    if ( _actual_offset + end_cursor > _file_size - 1)
+    {
+        end_cursor = _file_size - 1 - _actual_offset;
+        is_success = false;
+    }
+
     const uintmax_t past_chars = (_actual_offset + end_cursor)
                                  - (backup_offset + backup_cursor);
     _content[past_chars+1] = {'\0'};
@@ -152,7 +161,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
             memcpy(&_content[i * _mapping_size], _address, _mapping_size);
             next_mapping();
         }
-        else if ( i == 1 )
+        else if ( i == 0 )
         {
             memcpy(&_content[i * _mapping_size],
                    _address,
@@ -170,7 +179,12 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         _cursor = end_cursor + 1;
 
     if (_cursor + _actual_offset >= _file_size - 1 )
+    {
+        _need_remap = true;
         _eof = true;
+    }
+    else if (_cursor > _mapping_size - 1 )
+        _need_remap = true;
 
     return is_success;
 }
