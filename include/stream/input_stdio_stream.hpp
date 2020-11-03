@@ -28,6 +28,7 @@ private:
      */
     char str [100];
 
+
     /**
      * Tracks if the file is open or not.
      */

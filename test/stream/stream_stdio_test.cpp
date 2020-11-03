@@ -4,13 +4,10 @@
 #include <resources_config.hpp>
 
 class StdioTest : public testing::Test{
-    void SetUp() override ;
 
 protected:
     const std::string name =   std::string(RESOURCES_DIR) + "/movie_info.csv";
 };
-void StdioTest::SetUp()
-{printf("STDIO TESTS");}
 
 // input tests
 
@@ -51,13 +48,39 @@ TEST_F(StdioTest, read_all)
             if (!input.empty())
                 lines.push_back(input);
         }
-        std::cout << " n lines ";
-        std::cout << lines.size();
         SUCCEED();
     }
     catch(std::runtime_error const& err){
-        std::cout << " n lines ";
-        std::cout << lines.size();
         FAIL();
     }
+    std::cout << " n lines ";
+    std::cout << lines.size();
 }
+
+// output tests
+
+class TestStdioOutputStream : public testing::Test {
+protected:
+
+    const std::string output_file_path =
+        std::string(OUTPUT_DIR) + "/output_1.txt";
+};
+
+TEST_F(TestStdioOutputStream, create_close){
+    std::unique_ptr<io::OutputStream> stream = std::make_unique<io::StdioOutputStream>();
+    ASSERT_TRUE(stream->create(output_file_path));
+    ASSERT_TRUE(stream->close());
+}
+
+TEST_F(TestStdioOutputStream, fill){
+    std::unique_ptr<io::OutputStream> stream = std::make_unique<io::StdioOutputStream>();
+    ASSERT_TRUE(stream->create(output_file_path));
+    std::string to_write;
+    for(int i=0; i<100 ; i++){
+        to_write = std::to_string(i);
+        ASSERT_TRUE(stream->writeln(to_write));
+    }
+    ASSERT_TRUE(stream->close());
+}
+
+

@@ -31,11 +31,13 @@ bool io::StdioOutputStream::writeln(std::string instr)
     if (!_file_open) {
         return false;
     }
-    if(fputs(instr.c_str(),_file) < 0){
+    if(fputs((instr+"\n").c_str(),_file) < 0){
         std::cerr
             << "Error: couldn't write the line to the file"
             << std::endl;
+        return false;
     }
+    return true;
 }
 
 bool io::StdioOutputStream::close()
