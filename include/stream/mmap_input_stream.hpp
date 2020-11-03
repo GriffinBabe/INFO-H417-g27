@@ -152,7 +152,7 @@ private:
          * Content read from _mapped_region, with size _read_size.
          * Mainly fed using read_until_char method.
          */
-        char _content[];
+        char _content[]; // TODO fix ? source for error in test?
     };
 
     /**

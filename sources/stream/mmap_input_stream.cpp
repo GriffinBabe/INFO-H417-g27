@@ -11,8 +11,11 @@ io::MMapInputStream::~MMapInputStream()
 bool io::MMapInputStream::open(std::string const& file)
 {
     _file_name = file;
-    _mapping_handler = MappingHandler(_file_name,
-                                    _mapping_size);
+    _mapping_handler = MappingHandler(_file_name, _mapping_size);
+
+    // TODO : handle error
+    // https://www.boost.org/doc/libs/1_74_0/doc/html/boost/interprocess/interprocess_exception.html
+    return true;
 }
 
 std::string io::MMapInputStream::readln()
