@@ -27,7 +27,9 @@ cmake .. // will create the build files (makefile for linux, .sln for Visual Stu
 make // compiles the file with gcc
 ```
 
-You also need to manually download the database and put it in the `database/` folder.
+You also need to manually download the database and put it in the `database/` folder created in the root directory.
+
+Finally, create a `output/` folder in the root directory, it is necessary for the tests to pass.
 
 ## Clang-Format
 

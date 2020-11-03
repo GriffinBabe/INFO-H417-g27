@@ -6,6 +6,10 @@ add_library(
         streams SHARED
         stream/input_stream.cpp
         stream/output_stream.cpp
+        stream/simple_input_stream.cpp
+        stream/simple_output_stream.cpp
+        stream/buffered_input_stream.cpp
+        stream/buffered_output_stream.cpp
         stream/mmap_input_stream.cpp
         stream/mmap_output_stream.cpp
 )
