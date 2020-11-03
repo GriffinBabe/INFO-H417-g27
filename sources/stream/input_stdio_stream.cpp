@@ -1,4 +1,5 @@
 #include "stream/input_stdio_stream.hpp"
+#include <iostream>
 
 io::StdioInputStream::~StdioInputStream()
 {
@@ -37,7 +38,17 @@ std::string io::StdioInputStream::readln()
         throw std::runtime_error(
             "Tried to perform line read but the file is not opened yet.");
     }
-    fgets(str,500,_file);
+    if(fgets(str,100,_file) == nullptr){
+        _file_open = false;
+    }
     std::string input_str(str);
     return input_str;
+}
+
+bool io::StdioInputStream::end_of_stream() const
+{
+    if (_file_open) {
+        return false;
+    }
+    return feof(_file);
 }

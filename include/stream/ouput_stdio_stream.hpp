@@ -1,6 +1,6 @@
+#pragma once
 #include "output_stream.hpp"
 #include<stdio.h>
-#include <iostream>
 
 namespace io {
 class StdioOutputStream : public OutputStream {

@@ -1,4 +1,5 @@
 #include "stream/ouput_stdio_stream.hpp"
+#include <iostream>
 
 io::StdioOutputStream::~StdioOutputStream()
 {
@@ -30,7 +31,11 @@ bool io::StdioOutputStream::writeln(std::string instr)
     if (!_file_open) {
         return false;
     }
-    fputs(instr.c_str(),_file);
+    if(fputs(instr.c_str(),_file) < 0){
+        std::cerr
+            << "Error: couldn't write the line to the file"
+            << std::endl;
+    }
 }
 
 bool io::StdioOutputStream::close()
