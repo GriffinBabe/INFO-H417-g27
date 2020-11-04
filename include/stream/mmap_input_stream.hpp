@@ -33,6 +33,12 @@ private:
                        std::uint16_t mapping_size = 10);
 
         /**
+         * Return the value of _file_open: is the file open or not?
+         * @return bool, yes or no to the previous question
+         */
+        bool is_open();
+
+        /**
          * Map the next region of the file.
          * @return bool, if the next mapping was successful
          */
@@ -86,6 +92,11 @@ private:
          * Name of the file to map.
          */
         const char* _file_name;
+
+        /**
+         * Determine if the corresponding file is "open" or not
+         */
+         bool _file_open = false;
 
         /**
          * Size of the file.

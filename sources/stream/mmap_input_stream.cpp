@@ -31,14 +31,23 @@ bool io::MMapInputStream::open(std::string const& file)
 std::string io::MMapInputStream::readln()
 {
     std::string text = std::string();
-    if (_mapping_handler.read_until_char('\n'))
+    if (_mapping_handler.is_open())
     {
-        text = _mapping_handler.get_content();
-        _mapping_handler.reset_content();
+        if (_mapping_handler.read_until_char('\n'))
+        {
+            text = _mapping_handler.get_content();
+            _mapping_handler.reset_content();
+        }
+        else
+        {
+
+        }
     }
-    //TODO
-    //std::string text = _mapping_handler.get_content();
-    //_mapping_handler.reset_content();
+    else
+    {
+        throw std::runtime_error(
+            "Tried to perform line read but the file is not opened yet.");
+    }
     return text;
 }
 
@@ -71,6 +80,12 @@ io::MMapInputStream::MappingHandler::MappingHandler(std::string& file,
     //_mapped_size = _mapped_region.get_size();
     reset(); // TODO
     _page_size = _mapped_region.get_page_size();
+    _file_open = true;
+}
+
+bool io::MMapInputStream::MappingHandler::is_open()
+{
+    return _file_open;
 }
 
 bool io::MMapInputStream::MappingHandler::next_mapping()
@@ -90,7 +105,6 @@ bool io::MMapInputStream::MappingHandler::remap(uintmax_t offset)
                                             _mapping_size);
         _address = static_cast<char*>(_mapped_region.get_address());
         _mapped_size = _mapped_region.get_size();
-        //reset_content();
         _need_remap = false;
         if (offset + _mapping_size < _file_size -1)
             _eof = false;
@@ -144,10 +158,6 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     bool is_success = true;
     char* char_ptr = nullptr;
 
-    int t_flag = 0; // TODO : remove the flag
-    int t_size = 0; // TODO : remove
-    t_size = _mapped_size; // TODO : remove after debugging
-
     do
     {
         if (!first_pass)
@@ -171,7 +181,6 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
                 loop_ctr++;
             else
             {
-                t_flag = 1; // TODO : remove the flag
                 is_success = false;
                 break;
             }
@@ -202,12 +211,15 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     const uintmax_t past_chars = (_actual_offset + end_cursor - 1)
                                  - (backup_offset + backup_cursor);
     char content[past_chars+1];
+    content[past_chars] = '\0';
     remap(backup_offset);
     for (int i = 0; i < loop_ctr; i++)
     {
         if ( i != 0 && i != loop_ctr - 1)
         {
-            memcpy(&content[i * _mapping_size], _address, _mapping_size);
+            memcpy(&content[i * _mapping_size],
+                   _address,
+                   _mapping_size);
             next_mapping();
         }
         else if ( i == 0 )
