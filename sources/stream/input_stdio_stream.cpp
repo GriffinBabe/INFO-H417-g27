@@ -1,5 +1,6 @@
 #include "stream/input_stdio_stream.hpp"
 #include <iostream>
+#include <string.h>
 
 io::StdioInputStream::~StdioInputStream()
 {
@@ -38,8 +39,8 @@ std::string io::StdioInputStream::readln()
         throw std::runtime_error(
             "Tried to perform line read but the file is not opened yet.");
     }
-    if(fgets(str,100,_file) == nullptr){
-        _file_open = false;
+    if(fgets(str,4096,_file) == nullptr){ // to do : add something more dynamic by extanding the buffer with memcpy
+            _file_open = false;
     }
     std::string input_str(str);
     return input_str;

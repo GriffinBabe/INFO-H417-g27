@@ -26,8 +26,7 @@ private:
     /**
      * Store input string
      */
-    char str [100];
-
+    char str [4096];
 
     /**
      * Tracks if the file is open or not.
