@@ -67,7 +67,8 @@ private:
          * Content is mainly fed using read_until_char method.
          * @return characters stored in _content char array
          */
-        const char* get_content();
+        //const char* get_content();
+        std::string get_content();
 
         /**
          * Reset the _content array.
@@ -152,7 +153,8 @@ private:
          * Content read from _mapped_region, with size _read_size.
          * Mainly fed using read_until_char method.
          */
-        char _content[]; // TODO fix ? source for error in test?
+        //char _content[]; // TODO fix ? source for error in test?
+        std::string _content;
     };
 
     /**

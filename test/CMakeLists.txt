@@ -16,10 +16,6 @@ add_executable(
 )
 target_link_libraries(buffered_stream_test streams GTest::Main)
 
-gtest_discover_tests(example_test)
-gtest_discover_tests(simple_stream_test)
-gtest_discover_tests(buffered_stream_test)
-
 add_executable(
     mmap_stream_test
     stream/mmap_stream_test.cpp
@@ -27,4 +23,6 @@ add_executable(
 target_link_libraries(mmap_stream_test streams GTest::Main)
 
 gtest_discover_tests(example_test)
+gtest_discover_tests(simple_stream_test)
+gtest_discover_tests(buffered_stream_test)
 gtest_discover_tests(mmap_stream_test)

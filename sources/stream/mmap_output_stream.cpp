@@ -67,7 +67,7 @@ bool io::MMapOutputStream::MappingHandler::remap(uintmax_t offset)
     _address = static_cast<char*>(_mapped_region.get_address());
     _mapped_size = _mapped_region.get_size();
     _flush_offset = 0;
-    return EXIT_SUCCESS;
+    return true;
 }
 
 void io::MMapOutputStream::MappingHandler::reset_vars()
