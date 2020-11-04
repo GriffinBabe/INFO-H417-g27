@@ -39,8 +39,11 @@ std::string io::StdioInputStream::readln()
         throw std::runtime_error(
             "Tried to perform line read but the file is not opened yet.");
     }
-    if(fgets(str,4096,_file) == nullptr){ // to do : add something more dynamic by extanding the buffer with memcpy
+    while(fgets(str,sizeof(str),_file) == nullptr){
+        if(feof(_file)){
             _file_open = false;
+            break;
+        }// to do : add something more dynamic by extanding the buffer with memcpy (or is it efficient ? must avoid overhead)
     }
     std::string input_str(str);
     return input_str;
