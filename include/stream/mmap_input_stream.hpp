@@ -51,6 +51,11 @@ private:
          */
          bool remap(uintmax_t offset);
 
+         /**
+          * Check if a remap will be necessary
+          */
+         void check_remap();
+
         /**
          * Reset variables to initial values.
          */
