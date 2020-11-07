@@ -1,7 +1,7 @@
 #include "stream/mmap_output_stream.hpp"
 
 io::MMapOutputStream::MMapOutputStream(std::uint16_t mapping_size)
-    : _buffer_size(mapping_size)
+    : _mapping_size(mapping_size)
 {}
 
 io::MMapOutputStream::~MMapOutputStream()
@@ -9,7 +9,22 @@ io::MMapOutputStream::~MMapOutputStream()
 
 bool io::MMapOutputStream::create(std::string const& path)
 {
-    return _mapping_handler.create_file();
+    _file_name = path;
+    try
+    {
+        _mapping_handler = MappingHandler(_file_name, _mapping_size);
+        return _mapping_handler.create_file();
+    } catch (const bip::interprocess_exception& exception )
+    {
+        /*
+        throw std::runtime_error(
+            exception.what());
+        */
+        return false;
+    } catch (...)
+    {
+        return false;
+    }
 }
 
 bool io::MMapOutputStream::writeln(std::string str)
@@ -29,7 +44,7 @@ bool io::MMapOutputStream::close()
 
 io::MMapOutputStream::MappingHandler::MappingHandler(std::string& file,
                                                     std::uint16_t mapping_size)
-    : _file_name(file.c_str()), _mapping_size(mapping_size*sizeof(char))
+    : _file_name(file.c_str()), _mapping_size(mapping_size)
 {
     _mapped_file = bip::file_mapping(_file_name, _mode);
     reset();
@@ -46,6 +61,7 @@ bool io::MMapOutputStream::MappingHandler::create_file()
     {
         fbuf.pubseekoff(0, std::ios_base::beg);
         fbuf.sputc('\0');
+        fbuf.close();
         return true;
     }
     else
@@ -107,6 +123,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
         fbuf.pubseekoff(_actual_offset + length + 1, std::ios_base::beg);
         fbuf.sputc('\n');
+        fbuf.close();
     }
 
     if (first_size > 0)

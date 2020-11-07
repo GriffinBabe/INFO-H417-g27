@@ -146,14 +146,5 @@ private:
      * Object handling the mapping and reading procedures.
      */
     MappingHandler _mapping_handler;
-    /**
-    * Character write buffer wrapper
-    */
-
-    std::uint16_t _buffer_size = 10;
-
-    FILE* _file = nullptr;
-
-    bool _file_open = false;
 };
 }
