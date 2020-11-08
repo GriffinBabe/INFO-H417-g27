@@ -46,6 +46,7 @@ io::MMapOutputStream::MappingHandler::MappingHandler(std::string& file,
                                                     std::uint16_t mapping_size)
     : _file_name(file.c_str()), _mapping_size(mapping_size)
 {
+    create_file();
     _mapped_file = bip::file_mapping(_file_name, _mode);
     reset();
     _page_size = _mapped_region.get_page_size();
