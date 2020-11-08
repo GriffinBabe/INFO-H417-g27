@@ -13,6 +13,9 @@ bool io::MMapOutputStream::create(std::string const& path)
     try
     {
         _mapping_handler = MappingHandler(_file_name, _mapping_size);
+        if (_mapping_handler.is_created())
+            _mapping_handler.set_init();
+
         return _mapping_handler.is_created();
     } catch (const bip::interprocess_exception& exception )
     {
@@ -29,7 +32,10 @@ bool io::MMapOutputStream::create(std::string const& path)
 
 bool io::MMapOutputStream::writeln(std::string str)
 {
-    return _mapping_handler.writeln_text(str.c_str());
+    if (_mapping_handler.is_init())
+        return _mapping_handler.writeln_text(str.c_str());
+    else
+        return false;
 }
 
 bool io::MMapOutputStream::close()
@@ -50,6 +56,16 @@ io::MMapOutputStream::MappingHandler::MappingHandler(std::string& file,
     _mapped_file = bip::file_mapping(_file_name, _mode);
     reset();
     _page_size = _mapped_region.get_page_size();
+}
+
+void io::MMapOutputStream::MappingHandler::set_init()
+{
+    _is_init = true;
+}
+
+bool io::MMapOutputStream::MappingHandler::is_init()
+{
+    return _is_init;
 }
 
 bool io::MMapOutputStream::MappingHandler::create_file()

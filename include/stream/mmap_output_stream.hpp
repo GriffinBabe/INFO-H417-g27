@@ -31,6 +31,18 @@ private:
         MappingHandler(std::string& file,
                        std::uint16_t mapping_size = 10);
 
+
+        /**
+         * Set the _is_init variable to true.
+         */
+        void set_init();
+
+        /**
+         * Tell if the mapping handler was initialized or not.
+         * @return bool, yes or no to the question
+         */
+        bool is_init();
+
         /**
          * Initialize a file with the _file_name name.
          * @return bool, yes or no the operation was successful
@@ -38,7 +50,8 @@ private:
         bool create_file();
 
         /**
-         * Tell if the file creation was correctly performed
+         * Tell if the file creation was correctly performed.
+         * @return bool, yes or no the file was created
          */
          bool is_created();
 
@@ -75,6 +88,7 @@ private:
 
         /**
          * Close all current mapping.
+         * @return bool, yes or no the closing operation was successful
          */
          bool empty_mapping();
 
@@ -139,6 +153,11 @@ private:
          * Indicate if the file was created
          */
         bool _is_created = false;
+
+        /**
+         * Indicate if it was initialized
+         */
+         bool _is_init = false;
     };
 
 
