@@ -13,7 +13,7 @@ bool io::MMapOutputStream::create(std::string const& path)
     try
     {
         _mapping_handler = MappingHandler(_file_name, _mapping_size);
-        return _mapping_handler.create_file();
+        return _mapping_handler.is_created();
     } catch (const bip::interprocess_exception& exception )
     {
         /*
@@ -46,7 +46,7 @@ io::MMapOutputStream::MappingHandler::MappingHandler(std::string& file,
                                                     std::uint16_t mapping_size)
     : _file_name(file.c_str()), _mapping_size(mapping_size)
 {
-    create_file();
+    _is_created = create_file();
     _mapped_file = bip::file_mapping(_file_name, _mode);
     reset();
     _page_size = _mapped_region.get_page_size();
@@ -67,6 +67,11 @@ bool io::MMapOutputStream::MappingHandler::create_file()
     }
     else
         return false;
+}
+
+bool io::MMapOutputStream::MappingHandler::is_created()
+{
+    return _is_created;
 }
 
 bool io::MMapOutputStream::MappingHandler::next_mapping()
@@ -117,7 +122,8 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         complete_loops = (length - first_size - last_size) / _mapping_size;
     }
     else
-        first_size = length - _mapping_size - (_flush_offset+1);
+        first_size = length;
+        //first_size = length - _mapping_size - (_flush_offset+1);
 
     { // Increase the size of the file to allow mapping. It has its own scope.
         std::filebuf fbuf;

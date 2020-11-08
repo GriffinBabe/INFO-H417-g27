@@ -96,7 +96,7 @@ private:
         /**
          * Name of the file to map.
          */
-        const char* _file_name;
+        const char* _file_name = nullptr;
 
         /**
          * Determine if the corresponding file is "open" or not
@@ -153,7 +153,7 @@ private:
         /**
          * Starting address of the region.
          */
-        char* _address;
+        char* _address = nullptr;
 
         /**
          * Size of pages.

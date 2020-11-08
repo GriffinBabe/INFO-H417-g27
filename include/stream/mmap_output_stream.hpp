@@ -38,6 +38,11 @@ private:
         bool create_file();
 
         /**
+         * Tell if the file creation was correctly performed
+         */
+         bool is_created();
+
+        /**
          * Map the next region of the file.
          * @return bool, if the next mapping was successful
          */
@@ -77,7 +82,7 @@ private:
         /**
          * Name of the file to map.
          */
-        const char* _file_name;
+        const char* _file_name = nullptr;
 
         /**
          * Size of the file.
@@ -123,12 +128,17 @@ private:
         /**
          * Starting address of the region.
          */
-        char* _address;
+        char* _address = nullptr;
 
         /**
          * Size of pages.
          */
         std::size_t _page_size;
+
+        /**
+         * Indicate if the file was created
+         */
+        bool _is_created = false;
     };
 
 
