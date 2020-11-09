@@ -19,6 +19,20 @@ add_library(
 
 target_link_libraries(streams PUBLIC ${Boost_LIBRARIES}) # links boost libraries
 
+add_executable(
+        length
+        performance/length_main.cpp
+)
+
+target_link_libraries(length PUBLIC streams)
+
+add_executable(
+        randjump
+        performance/randjump_main.cpp
+)
+
+target_link_libraries(randjump PUBLIC streams)
+
 set(RESOURCES_DIR ${CMAKE_SOURCE_DIR}/database)
 set(OUTPUT_DIR ${CMAKE_SOURCE_DIR}/output)
 configure_file(resources_config.hpp.in ${CMAKE_SOURCE_DIR}/include/resources_config.hpp)
