@@ -22,7 +22,14 @@ add_executable(
 )
 target_link_libraries(mmap_stream_test streams GTest::Main)
 
+add_executable(
+    stdio_test
+    stream/stream_stdio_test.cpp
+)
+target_link_libraries(stdio_test streams GTest::Main)
+
 gtest_discover_tests(example_test)
 gtest_discover_tests(simple_stream_test)
 gtest_discover_tests(buffered_stream_test)
 gtest_discover_tests(mmap_stream_test)
+gtest_discover_tests(stdio_test)

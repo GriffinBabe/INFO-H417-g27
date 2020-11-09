@@ -13,6 +13,8 @@ add_library(
         stream/buffered_output_stream.cpp
         stream/mmap_input_stream.cpp
         stream/mmap_output_stream.cpp
+        stream/input_stdio_stream.cpp
+        stream/ouput_stdio_stream.cpp
 )
 
 target_link_libraries(streams PUBLIC ${Boost_LIBRARIES}) # links boost libraries
