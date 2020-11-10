@@ -42,6 +42,7 @@ std::string io::StdioInputStream::readln()
     while(fgets(str,sizeof(str),_file) == nullptr){
         if(feof(_file)){
             _file_open = false;
+            memset(str, 0, 4096);
             break;
         }// to do : add something more dynamic by extanding the buffer with memcpy (or is it efficient ? must avoid overhead)
     }
