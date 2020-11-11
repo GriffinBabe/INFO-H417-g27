@@ -1,6 +1,7 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <performance/length_stdio.hpp>
+#include <performance/length_simple.hpp>
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -12,7 +13,7 @@ int main(int argc, char** argv)
     // Parse arguments with Boost: https://www.boost.org/doc/libs/1_58_0/doc/html/program_options.html
     // issues with boost, will implement later
     if (argc == 3){
-        const std::string target = std::string(RESOURCES_DIR) + "/" +argv[1]+".csv";
+        const std::string target = std::string(RESOURCES_DIR) + "/" +argv[1]+ ".csv";
         const std::string argf(argv[2]);
         if (argf == "stdio"){
             std::unique_ptr<tl::length_stdio> stdio_length = std::make_unique<tl::length_stdio>();
@@ -20,9 +21,12 @@ int main(int argc, char** argv)
                 stdio_length->count(target);
             }
         }
+        else if (argf == "simple"){
+            std::unique_ptr<tl::length_simple> simple_length = std::make_unique<tl::length_simple>();
+            if (simple_length != nullptr){
+                simple_length->count(target);
+            }
+        }
     }
-
     return 0;
-{
-}
 }
