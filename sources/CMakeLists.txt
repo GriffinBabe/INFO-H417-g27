@@ -24,14 +24,14 @@ add_executable(
         performance/length_main.cpp
 )
 
-target_link_libraries(length PUBLIC streams)
+target_link_libraries(length PUBLIC streams ${Boost_LIBRARIES})
 
 add_executable(
         randjump
         performance/randjump_main.cpp
 )
 
-target_link_libraries(randjump PUBLIC streams)
+target_link_libraries(randjump PUBLIC streams Boost::program_options)
 
 set(RESOURCES_DIR ${CMAKE_SOURCE_DIR}/database)
 set(OUTPUT_DIR ${CMAKE_SOURCE_DIR}/output)

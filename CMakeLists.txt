@@ -16,7 +16,7 @@ else()
 endif()
 
 # Looks for Boost in your system
-find_package(Boost)
+find_package(Boost COMPONENTS filesystem program_options random REQUIRED)
 if (${Boost_FOUND})
 else()
     message(FATAL_ERROR Couldn't find Boost)
