@@ -42,16 +42,7 @@ std::string io::BufferedInputStream::readln()
     }
     _buffer.reset();
 
-    // local buffer not to mix with _buffer
-    char local_buf;
-
-    while (true) {
-        local_buf = _reader.read();
-        if (local_buf == '\n' || local_buf == '\0') {
-            break;
-        }
-        _buffer.add(local_buf);
-    };
+    while (_reader.read(_buffer));
 
     return _buffer.get();
 }
@@ -82,18 +73,34 @@ io::BufferedInputStream::BufferReader::BufferReader(FILE* file,
     _eof_reached = reset();
 }
 
-char io::BufferedInputStream::BufferReader::read()
+bool io::BufferedInputStream::BufferReader::read(util::StringBuffer& str)
 {
     if (_cursor > _cur_read - 1) {
         if (!_eof_reached) {
-            _eof_reached = reset();
-        }
-        else {
-            _eof = true;
-            return '\0';
+            _eof = reset();
         }
     }
-    return _ptr.get()[_cursor++];
+    // look for an occurrence of \n in the buffer content
+    char* end_of_line = strstr(_ptr.get() + _cursor, "\n");
+
+    // copy all the content
+    if (end_of_line == nullptr) {
+        str.add(_ptr.get() + _cursor, _read_size - _cursor + 1);
+        _cursor = _read_size;
+    }
+    else {
+        str.add(_ptr.get() + _cursor, end_of_line - _ptr.get() - _cursor);
+        _cursor += (end_of_line - _ptr.get()) - _cursor + 1;
+    }
+
+    // end of file reached. cannot read anymore.
+    if (_eof) {
+        return false;
+    }
+
+    // if eol or the eof are not found, then the read function needs to be called
+    // again, it will therefore return true.
+    return (end_of_line == nullptr);
 }
 
 bool io::BufferedInputStream::BufferReader::reset()
@@ -107,3 +114,4 @@ bool io::BufferedInputStream::BufferReader::eof() const
 {
     return _eof;
 }
+

@@ -20,12 +20,23 @@ public:
     StringBuffer(std::uint32_t _base_allocation);
 
     /**
-     * Adds a character to the buffer. If the buffer is full, then it
-     * reallocates it and doubles it's size. The old data is copied to then new
-     * buffer.
-     * @param c the character to add.
+     * Copies a single character into the buffer. If the buffer is full, then it
+     * reallocates it and doubles it's size until the size is big enough.
+     * The old data is then copied to the buffer.
+     *
+     * @param c
      */
     void add(char c);
+
+    /**
+     * Copies a string of specified length to the buffer. If the buffer is full,
+     * then it reallocates it and doubles it's size until the size is big enough.
+     * The old data is then copied to the buffer.
+     *
+     * @param c
+     * @param len
+     */
+    void add(char* c, int len);
 
     /**
      * Sets the cursor to the base position to reuse the buffer.
@@ -39,10 +50,13 @@ public:
     std::string get();
 
 private:
+
+    void reallocate();
+
     /**
      * Reallocates the buffer. The new allocated space is doubled.
      */
-    void reallocate();
+    void reallocate(std::uint32_t min_size);
 
     std::uint32_t _allocated_size = 0;
 

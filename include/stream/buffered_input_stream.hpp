@@ -30,11 +30,12 @@ private:
         BufferReader(FILE* file, std::uint32_t read_size = 10);
 
         /**
-         * Reads a single character, reloads the buffer though reset() if
-         * necessary.
-         * @return the read character.
+         * Reads the content of the BufferReader and copies it in the given
+         * StringBuffer. If the end of line is reached or the end of stream is reached, returns false.
+         * @param str the StringBuffer to copy data into.
+         * @return false is the eol or eof is reached. true otherwise.
          */
-        char read();
+        bool read(util::StringBuffer& str);
 
         /**
          * Reloads the buffer.
