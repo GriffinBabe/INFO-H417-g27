@@ -1,5 +1,4 @@
 #include "performance/length.hpp"
 
-tl::length::~length()
-{
-}
+tl::length::~length(){}
+

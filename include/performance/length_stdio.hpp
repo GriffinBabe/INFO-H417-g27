@@ -5,9 +5,10 @@
 #define INFO_H417_LENGTH_STDIO_H
 namespace tl {
 class length_stdio : public length {
-    virtual ~length_stdio();
-    virtual bool count(const std::string& path) ;
-    virtual bool output(uint16_t* count, std::string* duration );
+public:
+    length_stdio() = default;
+    virtual bool count(const std::string& path) override;
+    virtual void output(uint16_t* count, std::string* duration ) override;
     const std::string output_file_path =
         std::string(OUTPUT_DIR) + "/output_stdio_length.txt"; //temp
 };
