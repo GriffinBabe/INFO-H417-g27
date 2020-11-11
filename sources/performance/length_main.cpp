@@ -1,11 +1,9 @@
 #include <boost/program_options.hpp>
-#include <iostream>
 #include <performance/length_stdio.hpp>
 #include <performance/length_simple.hpp>
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::exception;
+#include <performance/length_buffered.hpp>
+#include <performance/length_mmap.hpp>
+
 namespace po = boost::program_options;
 
 int main(int argc, char** argv)
@@ -25,6 +23,18 @@ int main(int argc, char** argv)
             std::unique_ptr<tl::length_simple> simple_length = std::make_unique<tl::length_simple>();
             if (simple_length != nullptr){
                 simple_length->count(target);
+            }
+        }
+        else if (argf == "buffered"){
+            std::unique_ptr<tl::length_buffered> buffered_length = std::make_unique<tl::length_buffered>();
+            if (buffered_length != nullptr){
+                buffered_length->count(target);
+            }
+        }
+        else if (argf == "mmap"){
+            std::unique_ptr<tl::length_mmap> mmap_length = std::make_unique<tl::length_mmap>();
+            if (mmap_length != nullptr){
+                mmap_length->count(target);
             }
         }
     }

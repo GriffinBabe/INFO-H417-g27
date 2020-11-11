@@ -1,6 +1,7 @@
 #pragma once
 #include <chrono>
 #include <string>
+#include <resources_config.hpp>
 #ifndef INFO_H417_LENGTH_HPP
 #define INFO_H417_LENGTH_HPP
 

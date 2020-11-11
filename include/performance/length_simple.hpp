@@ -1,6 +1,4 @@
 #include "length.hpp"
-#include <resources_config.hpp>
-#include <string>
 
 namespace tl {
 class length_simple : public length {
