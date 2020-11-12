@@ -1,15 +1,29 @@
-#include "performance/length_stdio.hpp"
+#include "performance/length_seq_read.hpp"
+#include "stream/buffered_input_stream.hpp"
 #include "stream/input_stdio_stream.hpp"
+#include "stream/mmap_input_stream.hpp"
 #include "stream/ouput_stdio_stream.hpp"
-#include <iostream>
-#include <resources_config.hpp>
+#include "stream/simple_input_stream.hpp"
 
-bool tl::length_stdio::count(const std::string& path){
+bool tl::length_seq_read::count(const std::string& path,const std::string& fonction){
     try {
+        output_file_path = std::string(OUTPUT_DIR) + "/output_"+fonction+"_seq_read.txt";
         uint16_t count = 0;
         std::chrono::time_point start = std::chrono::system_clock::now();
-        std::unique_ptr<io::InputStream> stream =
-            std::make_unique<io::StdioInputStream>();
+        std::unique_ptr<io::InputStream> stream = nullptr;
+        if(fonction == "stdio"){
+            stream = std::make_unique<io::StdioInputStream>();
+        }
+        else if(fonction == "simple"){
+            stream = std::make_unique<io::SimpleInputStream>();
+        }
+        else if(fonction == "buffered"){
+            stream = std::make_unique<io::BufferedInputStream>(1000,100);
+        }
+        else if(fonction == "mmap"){
+            stream = std::make_unique<io::MMapInputStream>(100);
+        }
+        else{ return false;}
         if(!stream->open(path)){
             return false;
         }
@@ -33,7 +47,7 @@ bool tl::length_stdio::count(const std::string& path){
     }
 }
 
-void tl::length_stdio::output(uint16_t* count, std::string* duration){
+void tl::length_seq_read::output(uint16_t* count, std::string* duration){
     std::unique_ptr<io::OutputStream> stream =
     std::make_unique<io::StdioOutputStream>();
     stream->create(output_file_path);
