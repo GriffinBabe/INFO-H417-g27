@@ -183,13 +183,19 @@ int main(int argc, char** argv)
     assert(stream->open(input_file));
 
     // starts the process
+    std::chrono::time_point start = std::chrono::system_clock::now();
     for (std::uint32_t count = 0; count < jump_numbers; count++) {
         stream->seek(positions[count]);
         std::string line = stream->readln();
         sum += line.size();
     }
 
+    std::chrono::time_point end = std::chrono::system_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+
     std::cout << "Sum of read characters: " << sum << std::endl;
+    std::cout << " ------ Duration: " << dur.count() << std::endl;
 
     return 0;
 }
