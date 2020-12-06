@@ -21,6 +21,15 @@ void util::StringBuffer::add(char c)
     _data.get()[_cursor++] = c;
 }
 
+void util::StringBuffer::add(char* c, int len)
+{
+    if (_cursor + len >= _allocated_size) {
+        reallocate(_cursor + len);
+    }
+    memcpy(_data.get() + _cursor, c, sizeof(char) * len);
+    _cursor += len;
+}
+
 void util::StringBuffer::reset()
 {
     _cursor = 0;
@@ -41,3 +50,12 @@ void util::StringBuffer::reallocate()
     std::swap(tmp, _data);
 }
 
+void util::StringBuffer::reallocate(std::uint32_t min_size)
+{
+    while (_allocated_size < min_size) {
+        _allocated_size *= 2;
+    }
+    std::unique_ptr<char> tmp(new char[_allocated_size]);
+    std::memcpy(tmp.get(), _data.get(), sizeof(char) * _cursor);
+    std::swap(tmp, _data);
+}
