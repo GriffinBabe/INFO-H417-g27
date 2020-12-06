@@ -195,7 +195,7 @@ int main(int argc, char** argv)
     auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 
     std::cout << "Sum of read characters: " << sum << std::endl;
-    std::cout << " ------ Duration: " << dur.count() << std::endl;
+    std::cout << " ------ Duration: " << dur.count() << "ms." << std::endl;
 
     return 0;
 }
