@@ -54,13 +54,12 @@ for file in database_folder_files:
 	subprocess.run(_command)
 	elapsed = time.time() - start
 	print(elapsed)
-	results['length']['fgets'][file] = elapsed
+	results['length']['fgets'][file] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
 # length program buffered stream
 buffer_sizes = [1000, 4096, 8192, 15000, 30000, 100000, 500000, 1000000]
 for file in database_folder_files:
-	file_path = database_folder+"/"+file
-	size = os.path.getsize(file_path)
+	results['length']['buffered'][file] = {}
 	for b_size in buffer_sizes:
 		# fgets stream
 		_command = command.format(executable_folder, 'length', '-b', b_size, database_folder, file).split(' ')
@@ -71,13 +70,16 @@ for file in database_folder_files:
 		subprocess.run(_command)
 		elapsed = time.time() - start
 		print(elapsed)
-		results['length']['buffered'][file] = {}
-		results['length']['buffered'][file][b_size] = elapsed 
+		results['length']['buffered'][file][b_size] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
-"""
+# length program mmap stream
 for file in database_folder_files:
-	for size in buffered:
-		_command = command.format(executable_folder, 'length', '-m', size, database_folder, file).split(' ')
+	file_path = database_folder+"/"+file
+	size = os.path.getsize(file_path)
+	results['length']['mmap'][file] = {}
+	for b_size in buffer_sizes:
+		# fgets stream
+		_command = command.format(executable_folder, 'length', '-m', b_size, database_folder, file).split(' ')
 		_command = list(filter(lambda a: a != '', _command))
 		print(_command)
 		start = time.time()
@@ -85,12 +87,23 @@ for file in database_folder_files:
 		subprocess.run(_command)
 		elapsed = time.time() - start
 		print(elapsed)
-		results['length']['mmap'][file] = {}
-		results['length']['mmap'][file][size] = elapsed 
-"""
+		results['length']['mmap'][file][b_size] = (elapsed, os.path.getsize(database_folder+'/'+file))
+
+# length program simple stream
+for file in database_folder_files:
+	# fgets stream
+	_command = command.format(executable_folder, 'length', '-s', '', database_folder, file).split(' ')
+	_command = list(filter(lambda a: a != '', _command))
+	print(_command)
+	start = time.time()
+	# launches script
+	subprocess.run(_command)
+	elapsed = time.time() - start
+	print(elapsed)
+	results['length']['simple'][file] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
 
 # saves the result file
-a_file = open('results.json', 'w')
+a_file = open('results_length.json', 'w')
 json.dump(results, a_file)
 a_file.close()
