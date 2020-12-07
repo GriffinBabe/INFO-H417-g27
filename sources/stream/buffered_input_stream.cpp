@@ -79,6 +79,10 @@ bool io::BufferedInputStream::BufferReader::read(util::StringBuffer& str)
         if (!_eof_reached) {
             _eof = reset();
         }
+        else {
+            _eof = true;
+            return false;
+        }
     }
     // look for an occurrence of \n in the buffer content
     char* end_of_line = strstr(_ptr.get() + _cursor, "\n");

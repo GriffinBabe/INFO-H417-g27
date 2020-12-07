@@ -44,7 +44,6 @@ current_command = command
 random_reads = 100000 # 100K jumps
 
 # length program fgets stream
-"""
 for file in database_folder_files:
 	# fgets stream
 	_command = command.format(executable_folder, 'length', '-f', '', database_folder, file).split(' ')
@@ -56,14 +55,15 @@ for file in database_folder_files:
 	elapsed = time.time() - start
 	print(elapsed)
 	results['length']['fgets'][file] = elapsed
-"""
 
-buffer_sizes = [100, 500, 1000, 1500, 3000, 5000, 10000, 40000, 100000]
 # length program buffered stream
+buffer_sizes = [1000, 4096, 8192, 15000, 30000, 100000, 500000, 1000000]
 for file in database_folder_files:
-	for size in buffer_sizes:
+	file_path = database_folder+"/"+file
+	size = os.path.getsize(file_path)
+	for b_size in buffer_sizes:
 		# fgets stream
-		_command = command.format(executable_folder, 'length', '-b', size, database_folder, file).split(' ')
+		_command = command.format(executable_folder, 'length', '-b', b_size, database_folder, file).split(' ')
 		_command = list(filter(lambda a: a != '', _command))
 		print(_command)
 		start = time.time()
@@ -72,9 +72,9 @@ for file in database_folder_files:
 		elapsed = time.time() - start
 		print(elapsed)
 		results['length']['buffered'][file] = {}
-		results['length']['buffered'][file][size] = elapsed 
+		results['length']['buffered'][file][b_size] = elapsed 
 
-
+"""
 for file in database_folder_files:
 	for size in buffered:
 		_command = command.format(executable_folder, 'length', '-m', size, database_folder, file).split(' ')
@@ -87,7 +87,7 @@ for file in database_folder_files:
 		print(elapsed)
 		results['length']['mmap'][file] = {}
 		results['length']['mmap'][file][size] = elapsed 
-
+"""
 
 
 # saves the result file
