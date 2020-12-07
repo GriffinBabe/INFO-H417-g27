@@ -20,3 +20,7 @@ output/
 *.lib
 *.dll
 *.so
+
+# Benchmark results
+test/python/*.json
+test/python/*.txt
