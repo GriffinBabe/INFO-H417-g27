@@ -83,7 +83,8 @@ io::BufferedOutputStream::BufferWriter::BufferWriter(FILE* file,
     : _file(file), _write_size(write_size)
 {
     assert(file != nullptr);
-    assert(fseek(_file, 0, SEEK_SET) == 0);
+    int ret_state = fseek(_file, 0, SEEK_SET);
+    assert(ret_state == 0);
     _ptr = std::unique_ptr<char>(new char[_write_size]);
 }
 

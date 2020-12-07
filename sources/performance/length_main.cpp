@@ -141,7 +141,8 @@ int main(int argc, char** argv)
         break;
     }
 
-    assert(stream->open(input_file));
+    bool result = stream->open(input_file);
+    assert(result);
 
     std::uint64_t sum = 0;
 

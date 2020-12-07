@@ -1,7 +1,6 @@
 #include "stream/buffered_input_stream.hpp"
 #include <iostream>
 #include <assert.h>
-#include <sstream>
 
 io::BufferedInputStream::BufferedInputStream(std::uint16_t read_size,
                                              std::uint16_t buffer_size)
@@ -68,7 +67,8 @@ io::BufferedInputStream::BufferReader::BufferReader(FILE* file,
     : _file(file), _read_size(read_size)
 {
     assert(file != nullptr);
-    assert(fseek(_file, 0, SEEK_SET) == 0);
+    int ret_state = fseek(_file, 0, SEEK_SET);
+    assert(ret_state == 0);
     _ptr = std::unique_ptr<char>(new char[_read_size]);
     _eof_reached = reset();
 }

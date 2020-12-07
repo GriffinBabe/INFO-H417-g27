@@ -12,6 +12,8 @@ namespace po = boost::program_options;
 
 enum StreamType { SIMPLE, STDIO, BUFFERED, MMAP };
 
+const std::uint64_t random_seed = 2049;
+
 /**
  * Type of used stream, specified in command line arguments, uses STDIO by
  * default if not specified.
@@ -146,9 +148,8 @@ int main(int argc, char** argv)
 
     std::cout << "File size is: " << size << "." << std::endl;
 
-    // initializes all the random positions
-    boost::random::random_device dev;
-    boost::random::mt19937 rng(dev());
+    // initializes all the random positions from the constant seed
+    boost::random::mt19937 rng(random_seed);
     boost::uniform_int<> dist(0, size);
     boost::variate_generator<boost::mt19937, boost::uniform_int<>> dice(rng,
                                                                         dist);
@@ -180,7 +181,8 @@ int main(int argc, char** argv)
         break;
     }
 
-    assert(stream->open(input_file));
+    bool result = stream->open(input_file);
+    assert(result);
 
     // starts the process
     std::chrono::time_point start = std::chrono::system_clock::now();
