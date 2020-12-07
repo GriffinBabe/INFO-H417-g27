@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-io::SimpleInputStream::SimpleInputStream(std::uint16_t buffer_size)
+io::SimpleInputStream::SimpleInputStream(std::uint32_t buffer_size)
     : _buffer_size(buffer_size)
 {
     _buffer = util::StringBuffer(_buffer_size);

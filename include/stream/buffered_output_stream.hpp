@@ -8,7 +8,7 @@ public:
 
     virtual ~BufferedOutputStream();
 
-    BufferedOutputStream(std::uint16_t buffer_size);
+    BufferedOutputStream(std::uint32_t buffer_size);
 
     virtual bool create(std::string const& path) override;
 
@@ -24,7 +24,7 @@ private:
     public:
         BufferWriter();
 
-        BufferWriter(FILE* file, std::uint16_t write_size = 10);
+        BufferWriter(FILE* file, std::uint32_t write_size = 10);
 
         /**
          * Registers a new character to the buffer. If the cursor
@@ -51,12 +51,12 @@ private:
         /**
          * Size of the wrapped buffer.
          */
-        std::uint16_t _write_size = 10;
+        std::uint32_t _write_size = 10;
 
         /**
          * Position of last character in our buffer.
          */
-        std::uint16_t _cursor = 0;
+        std::uint32_t _cursor = 0;
 
         /**
          * File descriptor.
@@ -64,7 +64,7 @@ private:
         FILE* _file = nullptr;
     };
 
-    std::uint16_t _buffer_size = 10;
+    std::uint32_t _buffer_size = 10;
 
     BufferWriter _writer;
 

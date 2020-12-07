@@ -2,8 +2,8 @@
 #include <iostream>
 #include <assert.h>
 
-io::BufferedInputStream::BufferedInputStream(std::uint16_t read_size,
-                                             std::uint16_t buffer_size)
+io::BufferedInputStream::BufferedInputStream(std::uint32_t read_size,
+                                             std::uint32_t buffer_size)
     : _buffer_size(buffer_size), _read_size(read_size)
 {
     _buffer = util::StringBuffer(_buffer_size);

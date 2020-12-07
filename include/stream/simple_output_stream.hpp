@@ -8,7 +8,7 @@ public:
 
     virtual ~SimpleOutputStream();
 
-    SimpleOutputStream(std::uint16_t buffer_size);
+    SimpleOutputStream(std::uint32_t buffer_size);
 
     virtual bool create(std::string const& path) override;
 
@@ -18,7 +18,7 @@ public:
 
 private:
     FILE* _file = nullptr;
-    std::uint16_t _buffer_size = 10;
+    std::uint32_t _buffer_size = 10;
     bool _file_open = false;
 };
 } // namespace io

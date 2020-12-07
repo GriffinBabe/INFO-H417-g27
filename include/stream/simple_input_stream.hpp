@@ -7,7 +7,7 @@ class SimpleInputStream : public InputStream {
 public:
     SimpleInputStream() = default;
 
-    SimpleInputStream(std::uint16_t buffer_size);
+    SimpleInputStream(std::uint32_t buffer_size);
 
     virtual ~SimpleInputStream();
 
@@ -34,7 +34,7 @@ private:
     /**
      * The base size allocation for the buffer in the read() function.
      */
-    std::uint16_t _buffer_size = 10;
+    std::uint32_t _buffer_size = 10;
 
     /**
      * Tracks if the file is open or not.

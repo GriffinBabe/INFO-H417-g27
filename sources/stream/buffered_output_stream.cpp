@@ -17,7 +17,7 @@ io::BufferedOutputStream::~BufferedOutputStream()
     }
 }
 
-io::BufferedOutputStream::BufferedOutputStream(std::uint16_t buffer_size)
+io::BufferedOutputStream::BufferedOutputStream(std::uint32_t buffer_size)
     : _buffer_size(buffer_size)
 {
 }
@@ -79,7 +79,7 @@ io::BufferedOutputStream::BufferWriter::BufferWriter()
 }
 
 io::BufferedOutputStream::BufferWriter::BufferWriter(FILE* file,
-                                                     std::uint16_t write_size)
+                                                     std::uint32_t write_size)
     : _file(file), _write_size(write_size)
 {
     assert(file != nullptr);

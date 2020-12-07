@@ -1,7 +1,7 @@
 #include "stream/mmap_input_stream.hpp"
 
 
-io::MMapInputStream::MMapInputStream(std::uint16_t mapping_size)
+io::MMapInputStream::MMapInputStream(std::uint32_t mapping_size)
     : _mapping_size(mapping_size)
 {}
 
@@ -67,7 +67,7 @@ bool io::MMapInputStream::end_of_stream() const
 //-------------------------------------------------------------------
 
 io::MMapInputStream::MappingHandler::MappingHandler(std::string& file,
-                                                    std::uint16_t mapping_size)
+                                                    std::uint32_t mapping_size)
     : _file_name(file.c_str()), _mapping_size(mapping_size)
 {
     _file_size = sfs::file_size(_file_name);

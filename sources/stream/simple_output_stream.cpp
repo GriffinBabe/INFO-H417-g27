@@ -16,7 +16,7 @@ io::SimpleOutputStream::~SimpleOutputStream()
     }
 }
 
-io::SimpleOutputStream::SimpleOutputStream(std::uint16_t buffer_size)
+io::SimpleOutputStream::SimpleOutputStream(std::uint32_t buffer_size)
     : _buffer_size(buffer_size)
 {
 }

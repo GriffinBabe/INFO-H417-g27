@@ -6,8 +6,8 @@ namespace io {
 class BufferedInputStream : public InputStream {
 public:
     BufferedInputStream() = default;
-    BufferedInputStream(std::uint16_t read_size = 10,
-                        std::uint16_t buffer_size = 10);
+    BufferedInputStream(std::uint32_t read_size = 10,
+                        std::uint32_t buffer_size = 10);
 
     virtual ~BufferedInputStream();
 
@@ -99,7 +99,7 @@ private:
     /**
      * Size of the buffer vector in the readln() function
      */
-    std::uint16_t _buffer_size = 10;
+    std::uint32_t _buffer_size = 10;
 
     /**
      * Used by BufferReader.

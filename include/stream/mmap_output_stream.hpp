@@ -15,7 +15,7 @@ public:
 
     virtual ~MMapOutputStream();
 
-    MMapOutputStream(std::uint16_t mapping_size);
+    MMapOutputStream(std::uint32_t mapping_size);
 
     virtual bool create(std::string const& path) override;
 
@@ -29,7 +29,7 @@ private:
         MappingHandler() = default;
 
         MappingHandler(std::string& file,
-                       std::uint16_t mapping_size = 10);
+                       std::uint32_t mapping_size = 10);
 
 
         /**
@@ -111,12 +111,12 @@ private:
         /**
          * Size of the file to map in memory.
          */
-        std::uint16_t _mapping_size = 10;
+        std::uint32_t _mapping_size = 10;
 
         /**
          * Give the number of character to flush in mapped file.
          */
-        uint16_t _flush_offset = 0;
+        uint32_t _flush_offset = 0;
 
         /**
          * Mode of interaction with the mapped file.
@@ -164,7 +164,7 @@ private:
     /**
      * Size of the mapping to perform.
      */
-    std::uint16_t _mapping_size = 10;
+    std::uint32_t _mapping_size = 10;
 
     /**
      * Name of the file to map and to read from.

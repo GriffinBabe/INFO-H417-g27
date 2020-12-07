@@ -14,7 +14,7 @@ public:
 
     virtual ~MMapInputStream();
 
-    MMapInputStream(std::uint16_t mapping_size = 10);
+    MMapInputStream(std::uint32_t mapping_size = 10);
 
     virtual bool open(std::string const& file) override;
 
@@ -30,7 +30,7 @@ private:
         MappingHandler() = default;
 
         MappingHandler(std::string& file,
-                       std::uint16_t mapping_size = 10);
+                       std::uint32_t mapping_size = 10);
 
         /**
          * Return the value of _file_open: is the file open or not?
@@ -116,12 +116,12 @@ private:
         /**
          * Size of the file to map in memory.
          */
-        std::uint16_t _mapping_size = 10;
+        std::uint32_t _mapping_size = 10;
 
         /**
         * Current read position in the mapped region.
         */
-        std::uint16_t _cursor = 0;
+        std::uint32_t _cursor = 0;
 
         /**
          * Indicate if a remap will be necessary
@@ -176,7 +176,7 @@ private:
     /**
      * Size of the mapping to perform.
      */
-    std::uint16_t _mapping_size = 10;
+    std::uint32_t _mapping_size = 10;
 
     /**
      * Name of the file to map and to read from.

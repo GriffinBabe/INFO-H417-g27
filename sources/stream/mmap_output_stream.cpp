@@ -1,6 +1,6 @@
 #include "stream/mmap_output_stream.hpp"
 
-io::MMapOutputStream::MMapOutputStream(std::uint16_t mapping_size)
+io::MMapOutputStream::MMapOutputStream(std::uint32_t mapping_size)
     : _mapping_size(mapping_size)
 {}
 
@@ -49,7 +49,7 @@ bool io::MMapOutputStream::close()
 //-------------------------------------------------------------------
 
 io::MMapOutputStream::MappingHandler::MappingHandler(std::string& file,
-                                                    std::uint16_t mapping_size)
+                                                    std::uint32_t mapping_size)
     : _file_name(file.c_str()), _mapping_size(mapping_size)
 {
     _is_created = create_file();
@@ -127,10 +127,10 @@ void io::MMapOutputStream::MappingHandler::reset()
 
 bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 {
-    uint16_t length = strlen(text);
-    uint16_t first_size = 0; // In case _flush_offset is not zero
-    uint16_t last_size = 0; // In case length is not multiple of _mapping_size
-    uint16_t complete_loops = 0; // Number of full memcpy to perform.
+    uint32_t length = strlen(text);
+    uint32_t first_size = 0; // In case _flush_offset is not zero
+    uint32_t last_size = 0; // In case length is not multiple of _mapping_size
+    uint32_t complete_loops = 0; // Number of full memcpy to perform.
     if ( _mapping_size - _flush_offset < length )
     {
         first_size = _mapping_size - _flush_offset; // If 0, remap occurs.
