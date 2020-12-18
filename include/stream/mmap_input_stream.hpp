@@ -3,6 +3,7 @@
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include "stream/input_stream.hpp"
+#include <iostream> // TODO
 
 namespace bip = boost::interprocess;
 namespace sfs = std::filesystem;
@@ -67,7 +68,8 @@ private:
         void reset();
 
         /**
-         * Read until the first instance of a character from the given position.
+         * Read until the first instance of a character from the given 
+		 * position.
          * @param c, char to search
          * @return bool, if the char was found
          */

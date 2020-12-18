@@ -1,6 +1,7 @@
 #include "stream/buffered_input_stream.hpp"
 #include <iostream>
 #include <assert.h>
+#include <cstring>
 
 io::BufferedInputStream::BufferedInputStream(std::uint32_t read_size,
                                              std::uint32_t buffer_size)

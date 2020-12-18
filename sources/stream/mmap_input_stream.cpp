@@ -72,7 +72,7 @@ io::MMapInputStream::MappingHandler::MappingHandler(std::string& file,
 {
     _file_size = sfs::file_size(_file_name);
     _mapped_file = bip::file_mapping(_file_name, _mode);
-    reset(); // TODO
+    reset();
     _page_size = _mapped_region.get_page_size();
     _file_open = true;
 }
@@ -142,14 +142,16 @@ void io::MMapInputStream::MappingHandler::reset()
 
 bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 {
+    // First, check if a remap is necessary
     if (_need_remap)
     {
         if ( !next_mapping() )
             return false;
-    }
+    } // Check also if the end of file was reached
     else if (_eof)
         return false;
 
+    // Initialize values that will be used
     int loop_ctr = 1; // one loop will be executed anyway
     uint16_t backup_cursor = _cursor;
     uintmax_t backup_offset = _actual_offset;
@@ -158,13 +160,16 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     bool is_success = true;
     char* char_ptr = nullptr;
 
+
+    // Search in the mapping of size _mapping_size if the character is present
     do
     {
+        // If it is not the first pass, do not need to care about backup_cursor
         if (!first_pass)
             char_ptr = static_cast<char*>(
                 std::memchr(_address, c, _mapping_size));
         else
-        {
+        { // If it is the first pass, take the backup_cursor into account
             char_ptr = static_cast<char*>(
                 std::memchr(_address + backup_cursor,
                             c, _mapping_size - backup_cursor));
@@ -185,22 +190,27 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         }
     } while (not first_pass and not found);
 
-    uint16_t end_cursor = 0; // offset of desired char in last mapping
+    // Compute the position of the end cursor depending on the char pointer
+	// that was found and the address of the actual mapping
+    uintmax_t end_cursor = 0; // offset of desired char in last mapping
     if (char_ptr != nullptr)
-        end_cursor = (uint16_t) (char_ptr - _address);
+    {
+        end_cursor = (uintmax_t) (char_ptr - _address);
+    }
     else
     {
         end_cursor = _file_size - 1 - _actual_offset;
     }
 
-    /*
+	/*
     if (end_cursor - 1 == 0) // in case we encounter a "\n{1,}" situation
     {
         _content = "\n";
         return true; // TODO : get opinion about this
-    }*/
+    }
+	*/
 
-    // In case found the character outside the _mapped_region (page alignment)
+    // In case found the character outside the file mapped
     if ( _actual_offset + end_cursor > _file_size - 1)
     {
         end_cursor = _file_size - 1 - _actual_offset;
@@ -210,6 +220,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     // end_cursor - 1 to avoid counting "\n" as a "past character"
     const uintmax_t past_chars = (_actual_offset + end_cursor - 1)
                                  - (backup_offset + backup_cursor);
+
     char content[past_chars+1];
     content[past_chars] = '\0';
     remap(backup_offset);
@@ -227,12 +238,11 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     {
         if ( i != 0 && i != loop_ctr - 1)
         {
-            //next_mapping(); // TODO remove
             std::memcpy(&content[idx],
                    _address,
                    _mapping_size);
             idx += _mapping_size;
-            next_mapping(); // TODO redo
+            next_mapping();
         }
         else if ( i == 0 && loop_ctr != 1 )
         {
@@ -240,7 +250,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
                    _address + backup_cursor,
                    _mapping_size - backup_cursor);
             idx = _mapping_size - backup_cursor;
-            next_mapping(); // TODO redo
+            next_mapping();
         }
         else if ( i == 0 && loop_ctr == 1)
         {
@@ -250,7 +260,6 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         }
         else
         {
-            //next_mapping(); // TODO remove
             std::memcpy(&content[idx],
                    _address,
                    end_cursor);
@@ -265,8 +274,6 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     return is_success;
 }
 
-/** TODO
-const char* io::MMapInputStream::MappingHandler::get_content()*/
 std::string io::MMapInputStream::MappingHandler::get_content()
 {
     return _content;
