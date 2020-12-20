@@ -24,3 +24,14 @@ output/
 # Benchmark results
 test/python/*.json
 test/python/*.txt
+
+# Undesired files due to wrong utilization of cmake
+test/*.cmake
+test/Makefile
+test/CMakeFiles
+sources/*.cmake
+sources/Makefile
+sources/CMakeFiles
+
+# Swap files
+**/*.swp
