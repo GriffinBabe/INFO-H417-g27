@@ -153,7 +153,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 
     // Initialize values that will be used
     int loop_ctr = 1; // one loop will be executed anyway
-    uint16_t backup_cursor = _cursor;
+    uintmax_t backup_cursor = _cursor;
     uintmax_t backup_offset = _actual_offset;
     bool first_pass = true;
     bool found = false;
@@ -223,7 +223,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 
     char content[past_chars+1];
     content[past_chars] = '\0';
-	if (loop_ctr >= 1) // TODO
+	if (loop_ctr > 1) // TODO
 		remap(backup_offset);
 
 	_cursor = backup_cursor; // TODO

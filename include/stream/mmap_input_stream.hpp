@@ -75,7 +75,13 @@ private:
          */
         bool read_until_char(char c);
 
-        /**
+		/**
+		 * Read
+		 *
+		 */
+		bool search_in_region(char c, uintmax_t size);
+        
+		/**
          * Return content stored in the char array _content.
          * Content is mainly fed using read_until_char method.
          * @return characters stored in _content char array
@@ -118,12 +124,12 @@ private:
         /**
          * Size of the file to map in memory.
          */
-        std::uint32_t _mapping_size = 10;
+        std::uintmax_t _mapping_size = 10;
 
         /**
         * Current read position in the mapped region.
         */
-        std::uint32_t _cursor = 0;
+        std::uintmax_t _cursor = 0;
 
         /**
          * Indicate if a remap will be necessary
