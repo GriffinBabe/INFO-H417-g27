@@ -223,7 +223,10 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 
     char content[past_chars+1];
     content[past_chars] = '\0';
-    remap(backup_offset);
+	if (loop_ctr >= 1) // TODO
+		remap(backup_offset);
+
+	_cursor = backup_cursor; // TODO
 
     if (past_chars == 0)
     {
@@ -282,7 +285,6 @@ std::string io::MMapInputStream::MappingHandler::get_content()
 void io::MMapInputStream::MappingHandler::reset_content()
 {
     _content = std::string();
-    //_content[_mapping_size+1] = {'\0'};
 }
 
 
