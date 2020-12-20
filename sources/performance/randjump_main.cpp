@@ -18,7 +18,7 @@ const std::uint64_t random_seed = 2049;
  * Type of used stream, specified in command line arguments, uses STDIO by
  * default if not specified.
  */
-StreamType type = SIMPLE;
+StreamType type = STDIO;
 
 /**
  * BufferedInputStream buffer size or MMapInputStream mapped size.
@@ -37,7 +37,7 @@ std::uint32_t jump_numbers = 0;
 
 std::string program_description =
     "Jumps into a random position of the input-file and reads a line, this "
-    "operation is repeated jump-numbers times";
+    "operation is repeated jump-numbers times.";
 
 std::string usage = "Usage: randjump [--help] input-file jump-numbers";
 

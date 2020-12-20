@@ -13,7 +13,7 @@ enum StreamType { SIMPLE, STDIO, BUFFERED, MMAP };
  * Type of used stream, specified in command line arguments, uses STDIO by
  * default if not specified.
  */
-StreamType type = SIMPLE;
+StreamType type = STDIO;
 
 /**
  * BufferedInputStream buffer size or MMapInputStream mapped size.
@@ -45,7 +45,7 @@ int parse_arguments(int argc, char** argv)
         desc.add_options()("help,h", "produce help message.")(
             "simple,s", "will use the SimpleInputStream.")(
             "fgets,f", "will use the StdioInputStream.")(
-            "map,m",
+				"map,m",
             po::value<int>(),
             "mapping size, if specified will use a MMapInputStream.")(
             "buffer,b",
