@@ -202,14 +202,6 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         end_cursor = _file_size - 1 - _actual_offset;
     }
 
-	/*
-    if (end_cursor - 1 == 0) // in case we encounter a "\n{1,}" situation
-    {
-        _content = "\n";
-        return true; // TODO : get opinion about this
-    }
-	*/
-
     // In case found the character outside the file mapped
     if ( _actual_offset + end_cursor > _file_size - 1)
     {
