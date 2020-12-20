@@ -223,10 +223,10 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 
     char content[past_chars+1];
     content[past_chars] = '\0';
-	if (loop_ctr > 1) // TODO
+	if (loop_ctr > 1)
 		remap(backup_offset);
 
-	_cursor = backup_cursor; // TODO
+	_cursor = backup_cursor;
 
     if (past_chars == 0)
     {
