@@ -33,6 +33,13 @@ add_executable(
 
 target_link_libraries(randjump PUBLIC streams Boost::program_options)
 
+add_executable(
+        rrmerge
+        performance/rrmerge_main.cpp
+)
+
+target_link_libraries(rrmerge PUBLIC streams ${Boost_LIBRARIES})
+
 set(RESOURCES_DIR ${CMAKE_SOURCE_DIR}/database)
 set(OUTPUT_DIR ${CMAKE_SOURCE_DIR}/output)
 configure_file(resources_config.hpp.in ${CMAKE_SOURCE_DIR}/include/resources_config.hpp)

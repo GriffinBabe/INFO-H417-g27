@@ -5,6 +5,10 @@
 #include <stream/input_stdio_stream.hpp>
 #include <stream/mmap_input_stream.hpp>
 #include <stream/simple_input_stream.hpp>
+#include <stream/buffered_output_stream.hpp>
+#include <stream/ouput_stdio_stream.hpp>
+#include <stream/mmap_output_stream.hpp>
+#include <stream/simple_output_stream.hpp>
 
 namespace po = boost::program_options;
 
@@ -33,15 +37,15 @@ std::vector<std::string> input_files;
 /**
  * The output file path, specified in the command line arguments.
  */
-std::vector<std::string> output_file;
+std::string output_file;
 
 std::string program_description =
     "Merges the content of the input files by copying one line of each file "
 	"in a round robin fashion, until all of them have been processed.";
 
 std::string usage = "Usage: rrmerge [--help] input-stream [size] "
-					"output-stream [size] input-files\n"
-					"where there should be at least 2 input files";
+					"output-stream [size] input-files; "
+					"\tthere should be at least 2 input files";
 
 int parse_arguments(int argc, char** argv)
 {
@@ -50,31 +54,31 @@ int parse_arguments(int argc, char** argv)
 
     try {
         po::positional_options_description pos;
-        pos.add("input-files", -1);
+		pos.add("input-files", -1);
 		// - 1 => translate positional options into input-file options
 
         po::options_description desc("Allowed options");
         desc.add_options()("help,h", "produce help message.")(
-            "simple-input,si", "will use the SimpleInputStream.")(
-            "fgets-input,fi", "will use the StdioInputStream.")(
-            "map-input,mi",
+            "si", "will use the SimpleInputStream.")(
+            "fi", "will use the StdioInputStream.")(
+            "mi",
             po::value<int>(),
             "mapping size, if specified will use a MMapInputStream.")(
-            "buffer-input,bi",
+            "bi",
             po::value<int>(),
             "buffer size, if specified, will use a BufferedInputStream.")(
-            "simple-output,so", "will use the SimpleOutputStream.")(
-            "fgets-output,fo", "will use the StdioOutputStream.")(
-            "map-output,mo",
+            "so", "will use the SimpleOutputStream.")(
+            "fo", "will use the StdioOutputStream.")(
+            "mo",
             po::value<int>(),
             "mapping size, if specified will use a MMapOutputStream.")(
-            "buffer-output,bo",
+            "bo",
             po::value<int>(),
             "buffer size, if specified, will use a BufferedOutputStream.")(
-            "output-file",
+            "output-file,o",
 			po::value<std::string>(),
 			"output csv file.")(
-            "input-files",
+            "input-files,i",
 			po::value<std::vector<std::string>>(),
 			"input csv file.");
 
@@ -93,54 +97,53 @@ int parse_arguments(int argc, char** argv)
             return 1;
         }
 
-        if (vm.count("simple-input")) {
+        if (vm.count("si")) {
             input_type = SIMPLE;
         }
 
-        if (vm.count("fgets-input")) {
+        if (vm.count("fi")) {
             input_type = STDIO;
         }
 
-        if (vm.count("buffer-input")) {
+        if (vm.count("bi")) {
             input_type = BUFFERED;
-            input_buffered_map_size = vm["buffer-input"].as<int>();
+            input_buffered_map_size = vm["bi"].as<int>();
         }
 
-        if (vm.count("map-input")) {
+        if (vm.count("mi")) {
             input_type = MMAP;
-            input_buffered_map_size = vm["map-input"].as<int>();
+            input_buffered_map_size = vm["mi"].as<int>();
         }
 
-        if (vm.count("simple-output")) {
+        if (vm.count("so")) {
             output_type = SIMPLE;
         }
 
-        if (vm.count("fgets-output")) {
+        if (vm.count("fo")) {
             output_type = STDIO;
         }
 
-        if (vm.count("buffer-output")) {
+        if (vm.count("bo")) {
             output_type = BUFFERED;
-            output_buffered_map_size = vm["buffer-output"].as<int>();
+            output_buffered_map_size = vm["bo"].as<int>();
         }
 
-        if (vm.count("map-output")) {
+        if (vm.count("mo")) {
             output_type = MMAP;
-            output_buffered_map_size = vm["map-output"].as<int>();
+            output_buffered_map_size = vm["mo"].as<int>();
         }
 
         if (vm.count("output-file")) {
             output_file = vm["output-file"].as<std::string>();
         }
 
-        if (vm.count("input-files") > 1) {
-			input_files = vm["input-files"].as<std::vector<std::string>>();
-        }
-		else {
-            std::cerr << usage << std::endl;
-            return 1;
+        if (!vm.count("output-file")) {
+            output_file = "./default_output.csv";
         }
 
+        if (vm.count("input-files")) {
+			input_files = vm["input-files"].as<std::vector<std::string>>();
+        }
     }
     catch (boost::bad_any_cast const& exc) {
         std::cerr << usage << std::endl;
@@ -153,6 +156,12 @@ int parse_arguments(int argc, char** argv)
                   << std::endl;
         return 1;
     }
+	if ( input_files.size() < 2 )
+	{
+        std::cerr << usage << std::endl;
+        std::cerr << "At least two input files are necessary." << std::endl;
+        return 1;
+	}
 
     return 0;
 }
@@ -212,7 +221,6 @@ int main(int argc, char** argv)
     case BUFFERED:
         std::cout << "Using BufferedOutputStream." << std::endl;
         output_stream = std::make_shared<io::BufferedOutputStream>(
-				output_buffered_map_size,
                 output_buffered_map_size);
         break;
     case MMAP:
@@ -227,7 +235,7 @@ int main(int argc, char** argv)
 	auto ifs = input_files.begin();
 	while (iss != input_streams.end() and ifs != input_files.end())
 	{
-		input_result = *iss->open(*ifs);
+		input_result = (*iss)->open(*ifs);
 		assert(input_result);
 		iss++; ifs ++;
 	}
@@ -253,7 +261,7 @@ int main(int argc, char** argv)
 		if (not_eof > 0)
 			not_eof = 0;
 		else
-			eof = true;
+		eof = true;
 	}
     std::chrono::time_point end = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = end - start;
