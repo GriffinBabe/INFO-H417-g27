@@ -186,24 +186,24 @@ int main(int argc, char** argv)
     switch (input_type) {
     case SIMPLE:
         std::cout << "Using SimpleInputStream." << std::endl;
-		for ( auto ptr : input_streams )
+		for ( auto& ptr : input_streams )
 			ptr = std::make_shared<io::SimpleInputStream>();
         break;
     case STDIO:
         std::cout << "Using StdioInputStream." << std::endl;
-		for ( auto ptr : input_streams )
+		for ( auto& ptr : input_streams )
 			ptr = std::make_shared<io::StdioInputStream>();
         break;
     case BUFFERED:
         std::cout << "Using BufferedInputStream." << std::endl;
-		for ( auto ptr : input_streams )
+		for ( auto& ptr : input_streams )
 			ptr = std::make_shared<io::BufferedInputStream>(
 					input_buffered_map_size,
 					input_buffered_map_size);
         break;
     case MMAP:
         std::cout << "Using MMapInputStream." << std::endl;
-		for ( auto ptr : input_streams )
+		for ( auto& ptr : input_streams )
 			ptr = std::make_shared<io::MMapInputStream>(
 					input_buffered_map_size);
         break;
@@ -248,7 +248,7 @@ int main(int argc, char** argv)
 	int not_eof = 0;
 	while (!eof)
 	{
-		for (auto input_stream : input_streams)
+		for (auto& input_stream : input_streams)
 		{
 			if (!input_stream->end_of_stream())
 			{
@@ -258,10 +258,11 @@ int main(int argc, char** argv)
 				not_eof++;
 			}
 		}
+		
 		if (not_eof > 0)
 			not_eof = 0;
 		else
-		eof = true;
+			eof = true;
 	}
     std::chrono::time_point end = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = end - start;
