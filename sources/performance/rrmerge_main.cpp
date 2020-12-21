@@ -270,5 +270,7 @@ int main(int argc, char** argv)
 
     std::cout << " ------ Duration: " << dur.count() << "ms." << std::endl;
 
+	output_stream->close();
+
     return 0;
 }
