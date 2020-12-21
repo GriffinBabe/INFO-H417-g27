@@ -209,7 +209,8 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     //_actual_offset += 1; // TODO: why was this here?
 	_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
 	//*_address += _flush_offset; // FIXME --- /!\ will bug at "Yo3" /!\
-	// bug ~ BUS ERROR
+	// bug ~ BUS ERROR, happens during memcpy after the eventual remapping,
+	// if there is one
 	// from tests it seems that _address += _flush_offset is the right way
 		
 	std::cout << "- Write line -" << std::endl; // TODO
