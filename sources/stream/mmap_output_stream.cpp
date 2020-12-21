@@ -127,6 +127,7 @@ void io::MMapOutputStream::MappingHandler::reset()
 
 bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 {
+	std::cout << "----- Will write line -----" << std::endl; // TODO
     uint32_t length = strlen(text);
     uint32_t first_size = 0; // In case _flush_offset is not zero
     uint32_t last_size = 0; // In case length is not multiple of _mapping_size
@@ -145,12 +146,17 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 	}
         //first_size = length - _mapping_size - (_flush_offset+1);
 
+	std::cout << "Length: " << length << std::endl; // TODO
     { // Increase the size of the file to allow mapping. It has its own scope.
 		std::cout << "Increase size START" << std::endl; // TODO
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
-        fbuf.pubseekoff(_actual_offset + length + 1, std::ios_base::beg);
+        //fbuf.pubseekoff(_actual_offset + length + 1, std::ios_base::beg);
+        fbuf.pubseekoff(_actual_offset + _flush_offset + length + 1,
+						std::ios_base::beg); // FIXME
         fbuf.sputc(0);
+		std::cout << "New size of file: " << // TODO
+			_actual_offset + _flush_offset + length + 1 << std::endl; // TODO
         //fbuf.sputc('\n'); // TODO
         fbuf.close();
 		std::cout << "Increase size END" << std::endl; // TODO
@@ -191,6 +197,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		std::cout << "Flush Offset: " <<_flush_offset << std::endl; // TODO
 		std::cout << "Mapping size: " <<_mapping_size << std::endl; // TODO
 		std::cout << "Last size: "<< last_size << std::endl; // TODO
+		std::cout << "Complete loops: "<< complete_loops << std::endl; // TODO
         memcpy(_address,
                &text[first_size + complete_loops*_mapping_size],
                last_size); // FIXME
@@ -200,8 +207,12 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     }
 	std::cout << "YoEND" << std::endl; // TODO
     //_actual_offset += 1; // TODO: why was this here?
-	*_address += _flush_offset; // FIXME
+	_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
+	//*_address += _flush_offset; // FIXME --- /!\ will bug at "Yo3" /!\
+	// bug ~ BUS ERROR
+	// from tests it seems that _address += _flush_offset is the right way
 		
+	std::cout << "- Write line -" << std::endl; // TODO
     return true;
 }
 
