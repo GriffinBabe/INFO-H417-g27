@@ -77,7 +77,7 @@ bool io::MMapOutputStream::MappingHandler::create_file()
     if ( fbuf.is_open() )
     {
         fbuf.pubseekoff(0, std::ios_base::beg);
-        fbuf.sputc('\0');
+        fbuf.sputc(0);
         fbuf.close();
         return true;
     }
@@ -133,46 +133,75 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     uint32_t complete_loops = 0; // Number of full memcpy to perform.
     if ( _mapping_size - _flush_offset < length )
     {
+		std::cout << "HelloFirst" << std::endl; // TODO
         first_size = _mapping_size - _flush_offset; // If 0, remap occurs.
         last_size = (length - first_size) % _mapping_size;
         complete_loops = (length - first_size - last_size) / _mapping_size;
     }
     else
+	{
+		std::cout << "HelloSecond" << std::endl; // TODO
         first_size = length;
+	}
         //first_size = length - _mapping_size - (_flush_offset+1);
 
     { // Increase the size of the file to allow mapping. It has its own scope.
+		std::cout << "Increase size START" << std::endl; // TODO
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
         fbuf.pubseekoff(_actual_offset + length + 1, std::ios_base::beg);
-        fbuf.sputc('\n');
+        fbuf.sputc(0);
+        //fbuf.sputc('\n'); // TODO
         fbuf.close();
+		std::cout << "Increase size END" << std::endl; // TODO
     }
 
+	std::cout << "YoSTART" << std::endl; // TODO
     if (first_size > 0)
     {
-        memcpy(_address, text, first_size);
+		std::cout << "Yo1" << std::endl; // TODO
+		memcpy(_address, &text, first_size);
+		std::cout << "Yo1_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, first_size);
         _flush_offset += first_size;
     }
+
     for (int i = 0; i < complete_loops; i++)
     {
+		std::cout << "Flush Offset " <<_flush_offset << std::endl; // TODO
+		std::cout << "Mapping size " <<_mapping_size << std::endl; // TODO
+		std::cout << "Length: "<< length << std::endl; // TODO
+		std::cout << "Yo2" << std::endl; // TODO
         next_mapping();
+		std::cout << "Yo2_remapped" << std::endl; // TODO
         memcpy(_address,
                &text[first_size + i*_mapping_size],
                _mapping_size);
+		std::cout << "Yo2_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, _mapping_size);
+        _flush_offset += _mapping_size; // FIXME line was added
     }
+
     if (last_size > 0)
     {
+		std::cout << "Yo3" << std::endl; // TODO
         next_mapping();
+		std::cout << "Yo3_remapped" << std::endl; // TODO
+		std::cout << "Length: "<< length << std::endl; // TODO
+		std::cout << "Flush Offset: " <<_flush_offset << std::endl; // TODO
+		std::cout << "Mapping size: " <<_mapping_size << std::endl; // TODO
+		std::cout << "Last size: "<< last_size << std::endl; // TODO
         memcpy(_address,
                &text[first_size + complete_loops*_mapping_size],
-               last_size);
+               last_size); // FIXME
+		std::cout << "Yo3_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, last_size);
-        _flush_offset = last_size;
+        _flush_offset += last_size;
     }
-    _actual_offset += 1;
+	std::cout << "YoEND" << std::endl; // TODO
+    //_actual_offset += 1; // TODO: why was this here?
+	*_address += _flush_offset; // FIXME
+		
     return true;
 }
 

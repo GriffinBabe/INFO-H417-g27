@@ -213,8 +213,8 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     const uintmax_t past_chars = (_actual_offset + end_cursor - 1)
                                  - (backup_offset + backup_cursor);
 
-    char content[past_chars+1];
-    content[past_chars] = '\0';
+    char content[past_chars+1] = "";
+    //content[past_chars] = '\0';
 	if (loop_ctr > 1)
 		remap(backup_offset);
 

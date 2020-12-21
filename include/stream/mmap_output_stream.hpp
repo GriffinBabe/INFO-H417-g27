@@ -4,6 +4,7 @@
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include "stream/output_stream.hpp"
+#include <iostream>
 
 namespace bip = boost::interprocess;
 namespace sfs = std::filesystem;
