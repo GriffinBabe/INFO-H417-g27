@@ -30,6 +30,11 @@ std::uint32_t output_buffered_map_size = 10;
  */
 std::vector<std::string> input_files;
 
+/**
+ * The output file path, specified in the command line arguments.
+ */
+std::vector<std::string> output_file;
+
 std::string program_description =
     "Merges the content of the input files by copying one line of each file "
 	"in a round robin fashion, until all of them have been processed.";
@@ -66,7 +71,11 @@ int parse_arguments(int argc, char** argv)
             "buffer-output,bo",
             po::value<int>(),
             "buffer size, if specified, will use a BufferedOutputStream.")(
-            "input-files", po::value<std::vector<std::string>>(),
+            "output-file",
+			po::value<std::string>(),
+			"output csv file.")(
+            "input-files",
+			po::value<std::vector<std::string>>(),
 			"input csv file.");
 
         po::variables_map vm;
@@ -120,6 +129,10 @@ int parse_arguments(int argc, char** argv)
             output_buffered_map_size = vm["map-output"].as<int>();
         }
 
+        if (vm.count("output-file")) {
+            output_file = vm["output-file"].as<std::string>();
+        }
+
         if (vm.count("input-files") > 1) {
 			input_files = vm["input-files"].as<std::vector<std::string>>();
         }
@@ -153,29 +166,37 @@ int main(int argc, char** argv)
     }
 
     // initializes the specified streams.
-    std::shared_ptr<io::InputStream> input_stream;
-    std::shared_ptr<io::InputStream> output_stream;
+	std::vector<std::shared_ptr<io::InputStream>> input_streams;
+	for ( int i = 0; i < input_files.size(); i++ )
+	{
+		input_streams.push_back(std::shared_ptr<io::InputStream>());
+	}
 
-	// TODO : below
+	std::shared_ptr<io::OutputStream> output_stream;
+
     switch (input_type) {
     case SIMPLE:
         std::cout << "Using SimpleInputStream." << std::endl;
-        input_stream = std::make_shared<io::SimpleInputStream>();
+		for ( auto ptr : input_streams )
+			ptr = std::make_shared<io::SimpleInputStream>();
         break;
     case STDIO:
         std::cout << "Using StdioInputStream." << std::endl;
-        input_stream = std::make_shared<io::StdioInputStream>();
+		for ( auto ptr : input_streams )
+			ptr = std::make_shared<io::StdioInputStream>();
         break;
     case BUFFERED:
         std::cout << "Using BufferedInputStream." << std::endl;
-        input_stream = std::make_shared<io::BufferedInputStream>(
-				input_buffered_map_size,
-				input_buffered_map_size);
+		for ( auto ptr : input_streams )
+			ptr = std::make_shared<io::BufferedInputStream>(
+					input_buffered_map_size,
+					input_buffered_map_size);
         break;
     case MMAP:
         std::cout << "Using MMapInputStream." << std::endl;
-        input_stream = std::make_shared<io::MMapInputStream>(
-				input_buffered_map_size);
+		for ( auto ptr : input_streams )
+			ptr = std::make_shared<io::MMapInputStream>(
+					input_buffered_map_size);
         break;
     }
 
@@ -201,22 +222,43 @@ int main(int argc, char** argv)
         break;
     }
 
-    bool result = input_stream->open(input_file);
-    assert(result);
-
-    std::uint64_t sum = 0;
+    bool input_result = false;
+	auto iss = input_streams.begin();
+	auto ifs = input_files.begin();
+	while (iss != input_streams.end() and ifs != input_files.end())
+	{
+		input_result = *iss->open(*ifs);
+		assert(input_result);
+		iss++; ifs ++;
+	}
+	
+	bool output_result = output_stream->create(output_file);
+	assert(output_result);
 
     std::chrono::time_point start = std::chrono::system_clock::now();
-    while (!stream->end_of_stream()) {
-        std::string line = stream->readln();
-        if (!line.empty())
-            sum += line.size();
-    }
+	bool eof = false;
+	int not_eof = 0;
+	while (!eof)
+	{
+		for (auto input_stream : input_streams)
+		{
+			if (!input_stream->end_of_stream())
+			{
+				std::string line = input_stream->readln();
+				if (!line.empty())
+					output_stream->writeln(line);
+				not_eof++;
+			}
+		}
+		if (not_eof > 0)
+			not_eof = 0;
+		else
+			eof = true;
+	}
     std::chrono::time_point end = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = end - start;
     auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 
-    std::cout << "Sum of read characters: " << sum << std::endl;
     std::cout << " ------ Duration: " << dur.count() << "ms." << std::endl;
 
     return 0;
