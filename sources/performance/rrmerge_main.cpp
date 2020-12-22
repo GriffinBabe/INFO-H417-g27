@@ -254,7 +254,7 @@ int main(int argc, char** argv)
 			{
 				std::string line = input_stream->readln();
 				if (!line.empty())
-					std::cout << line << std::endl; // TODO
+					std::cout << line; // TODO
 					output_stream->writeln(line);
 				not_eof++;
 			}

@@ -201,7 +201,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     }
 
     // end_cursor - 1 to avoid counting "\n" as a "past character"
-    const uintmax_t past_chars = (_actual_offset + end_cursor)
+    const uintmax_t past_chars = (_actual_offset + end_cursor + 1)
                                  - (backup_offset + backup_cursor);
 
 	// Prepare the char array to receive the data
@@ -247,13 +247,13 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         {// If the first and last mapped region
             std::memcpy(&content[idx],
                    _address + backup_cursor,
-                   end_cursor - backup_cursor);
+                   end_cursor + 1 - backup_cursor);
         }
         else
         { // If this is the last mapped region
             std::memcpy(&content[idx],
                    _address,
-                   end_cursor);
+                   end_cursor+1);
         }
     }
 
