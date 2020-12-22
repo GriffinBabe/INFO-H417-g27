@@ -150,6 +150,11 @@ private:
          */
         std::size_t _page_size;
 
+		/**
+		 * Indicate if a remapping operation is necessary
+		 */
+		bool _need_remap = false; // FIXME
+
         /**
          * Indicate if the file was created
          */
