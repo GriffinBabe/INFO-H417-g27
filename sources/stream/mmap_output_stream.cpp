@@ -127,14 +127,12 @@ void io::MMapOutputStream::MappingHandler::reset()
 
 bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 {
-	std::cout << "----- Will write line -----" << std::endl; // TODO
     uint32_t length = strlen(text);
     uint32_t first_size = 0; // In case _flush_offset is not zero
     uint32_t last_size = 0; // In case length is not multiple of _mapping_size
     uint32_t complete_loops = 0; // Number of full memcpy to perform.
     if ( _mapping_size - _flush_offset < length )
     { // If the content cannot fit in the actual mapping: 3 parts
-		std::cout << "HelloFirst" << std::endl; // TODO
         first_size = _mapping_size - _flush_offset; // If 0, remap occurs.
         last_size = (length - first_size) % _mapping_size; // What exceeds
         complete_loops = (length - first_size - last_size) / _mapping_size;
@@ -142,30 +140,21 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     }
     else
 	{ // All fit in the current mapping
-		std::cout << "HelloSecond" << std::endl; // TODO
         first_size = length;
 	}
 
-	std::cout << "Length: " << length << std::endl; // TODO
     { // Increase the size of the file to allow mapping. It has its own scope.
-		std::cout << "Increase size START" << std::endl; // TODO
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
         fbuf.pubseekoff(_actual_offset + _flush_offset + length + 1,
 						std::ios_base::beg);
         fbuf.sputc(0);
-		std::cout << "New size of file: " << // TODO
-			_actual_offset + _flush_offset + length + 1 << std::endl; // TODO
         fbuf.close();
-		std::cout << "Increase size END" << std::endl; // TODO
     }
 
-	std::cout << "YoSTART" << std::endl; // TODO
     if (first_size > 0)
     { // Copy everything that will fit in the current mapping
-		std::cout << "Yo1" << std::endl; // TODO
 		memcpy(_address, &text, first_size);
-		std::cout << "Yo1_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, first_size);
         _flush_offset += first_size;
 		_address += first_size;
@@ -173,50 +162,26 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 
     for (int i = 0; i < complete_loops; i++)
     { // Copy what exceeded the previous mapping and require full mapping size
-		std::cout << "Yo2" << std::endl; // TODO
         next_mapping();
-		std::cout << "Yo2_remapped" << std::endl; // TODO
-		std::cout << "Flush Offset: " <<_flush_offset << std::endl; // TODO
-		std::cout << "Mapping size: " <<_mapping_size << std::endl; // TODO
-		std::cout << "Length: "<< length << std::endl; // TODO
         memcpy(_address,
                &text[first_size + i*_mapping_size],
                _mapping_size);
-		std::cout << "Yo2_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, _mapping_size);
-        _flush_offset += _mapping_size; // FIXME line was added, full mapping
+        _flush_offset += _mapping_size;
 		_address += _mapping_size;
     }
 
     if (last_size > 0)
     { // Copy what exceeded previous mappings but not feeling a whole region
-		std::cout << "Yo3" << std::endl; // TODO
         next_mapping();
-		std::cout << "Yo3_remapped" << std::endl; // TODO
-		std::cout << "Length: "<< length << std::endl; // TODO
-		std::cout << "Flush Offset: " <<_flush_offset << std::endl; // TODO
-		std::cout << "Mapping size: " <<_mapping_size << std::endl; // TODO
-		std::cout << "Last size: "<< last_size << std::endl; // TODO
-		std::cout << "Complete loops: "<< complete_loops << std::endl; // TODO
         memcpy(_address,
                &text[first_size + complete_loops*_mapping_size],
-               last_size); // FIXME
-		std::cout << "Yo3_memcpied" << std::endl; // TODO
+               last_size);
         _mapped_region.flush(_flush_offset, last_size);
         _flush_offset += last_size; // We only flush last_size chars
 		_address += last_size;
     }
-	std::cout << "Flush Offset: "<< _flush_offset << std::endl; // TODO
-	std::cout << "YoEND" << std::endl; // TODO
-	// FIXME : options below have been splitted amongs the 3 parts above,
-	// but the problem is still valid
-	//_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
-	//*_address += _flush_offset; // FIXME --- /!\ will bug at "Yo3" /!\
-	// bug ~ BUS ERROR, happens during memcpy after the eventual remapping,
-	// if there is one
-	// from tests it seems that _address += _flush_offset is the right way
 		
-	std::cout << "- Write line -" << std::endl; // TODO
     return true;
 }
 
