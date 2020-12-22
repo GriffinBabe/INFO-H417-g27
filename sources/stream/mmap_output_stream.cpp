@@ -146,7 +146,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     { // Increase the size of the file to allow mapping. It has its own scope.
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
-        fbuf.pubseekoff(_actual_offset + _flush_offset + length + 1,
+        fbuf.pubseekoff(_actual_offset + _flush_offset + length - 1,
 						std::ios_base::beg);
         fbuf.sputc(0);
         fbuf.close();
