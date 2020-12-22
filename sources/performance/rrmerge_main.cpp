@@ -245,7 +245,9 @@ int main(int argc, char** argv)
         for (auto& input_stream : input_streams) {
             if (!input_stream->end_of_stream()) {
                 std::string line = input_stream->readln();
-                output_stream->writeln(line);
+                if (!line.empty()) {
+                    output_stream->writeln(line);
+                }
                 not_eof++;
             }
         }
