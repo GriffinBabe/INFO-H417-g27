@@ -155,10 +155,9 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     int loop_ctr = 1; // one loop will be executed anyway
     uintmax_t backup_cursor = _cursor;
     uintmax_t backup_offset = _actual_offset;
-    bool first_pass = true;
-    bool found = false;
-    bool is_success = true;
-    char* char_ptr = nullptr;
+    bool first_pass = true; // for the do-while, != behavior if true
+    bool is_found = false; // indicate if found the character c
+    char* char_ptr = nullptr; // pointer to the address of c
 
 
     // Search in the mapping of size _mapping_size if the character is present
@@ -177,36 +176,29 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         }
 
         if (char_ptr != nullptr)
-            found = true;
+            is_found = true;
         else
         {
             if ( next_mapping() )
                 loop_ctr++;
             else
-            {
-                is_success = false;
                 break;
-            }
         }
-    } while (not first_pass and not found);
+    } while (not first_pass and not is_found);
 
     // Compute the position of the end cursor depending on the char pointer
 	// that was found and the address of the actual mapping
     uintmax_t end_cursor = 0; // offset of desired char in last mapping
     if (char_ptr != nullptr)
-    {
         end_cursor = (uintmax_t) (char_ptr - _address);
-    }
     else
-    {
         end_cursor = _file_size - 1 - _actual_offset;
-    }
 
     // In case found the character outside the file mapped
     if ( _actual_offset + end_cursor > _file_size - 1)
     {
         end_cursor = _file_size - 1 - _actual_offset;
-        is_success = false;
+        is_found = false;
     }
 
     // end_cursor - 1 to avoid counting "\n" as a "past character"
@@ -260,13 +252,13 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
                    end_cursor);
         }
     }
-    if (is_success)
+    if (is_found)
         _cursor = end_cursor + 1;
 
     check_remap();
 
     _content = std::string(content);
-    return is_success;
+    return is_found;
 }
 
 std::string io::MMapInputStream::MappingHandler::get_content()
