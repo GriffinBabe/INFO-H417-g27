@@ -175,16 +175,16 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
             first_pass = false;
         }
 
-        if (char_ptr != nullptr)
+        if (char_ptr != nullptr) // Char is found
             is_found = true;
         else
-        {
-            if ( next_mapping() )
+        { // Char is not found
+            if ( next_mapping() ) // If mapping the next region is possible
                 loop_ctr++;
-            else
+            else // Otherwise stop here
                 break;
         }
-    } while (not first_pass and not is_found);
+    } while (not is_found);
 
     // Compute the position of the end cursor depending on the char pointer
 	// that was found and the address of the actual mapping
@@ -205,13 +205,17 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     const uintmax_t past_chars = (_actual_offset + end_cursor - 1)
                                  - (backup_offset + backup_cursor);
 
+	// Prepare the char array to receive the data
     char content[past_chars+1] = "";
-    //content[past_chars] = '\0';
+
+	// If a remap has not been necessary, do not remap
 	if (loop_ctr > 1)
 		remap(backup_offset);
 
+	// Re-load the backup cursor
 	_cursor = backup_cursor;
 
+	// If no chars were passed (instantaneously found a '\n'), then return
     if (past_chars == 0)
     {
         _content = "";
@@ -220,11 +224,12 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         return true;
     }
 
+	// Redo the mapping, this time copying its content
     int idx = 0;
     for (int i = 0; i < loop_ctr; i++)
     {
         if ( i != 0 && i != loop_ctr - 1)
-        {
+        {// If neither the first mapped region nor the last
             std::memcpy(&content[idx],
                    _address,
                    _mapping_size);
@@ -232,7 +237,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
             next_mapping();
         }
         else if ( i == 0 && loop_ctr != 1 )
-        {
+        {// If the first mapped region but not the last
             std::memcpy(&content[idx],
                    _address + backup_cursor,
                    _mapping_size - backup_cursor);
@@ -240,23 +245,27 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
             next_mapping();
         }
         else if ( i == 0 && loop_ctr == 1)
-        {
+        {// If the first and last mapped region
             std::memcpy(&content[idx],
                    _address + backup_cursor,
                    end_cursor - backup_cursor);
         }
         else
-        {
+        { // If this is the last mapped region
             std::memcpy(&content[idx],
                    _address,
                    end_cursor);
         }
     }
+
+	// Update the cursor if the character was found
     if (is_found)
         _cursor = end_cursor + 1;
 
+	// Check if a remap will be necessary
     check_remap();
 
+	// Build the string instance and return it to _content
     _content = std::string(content);
     return is_found;
 }
