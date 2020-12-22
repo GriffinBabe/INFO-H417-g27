@@ -2,12 +2,12 @@
 #include <iostream>
 
 #include <stream/buffered_input_stream.hpp>
+#include <stream/buffered_output_stream.hpp>
 #include <stream/input_stdio_stream.hpp>
 #include <stream/mmap_input_stream.hpp>
-#include <stream/simple_input_stream.hpp>
-#include <stream/buffered_output_stream.hpp>
-#include <stream/ouput_stdio_stream.hpp>
 #include <stream/mmap_output_stream.hpp>
+#include <stream/ouput_stdio_stream.hpp>
+#include <stream/simple_input_stream.hpp>
 #include <stream/simple_output_stream.hpp>
 
 namespace po = boost::program_options;
@@ -41,11 +41,12 @@ std::string output_file;
 
 std::string program_description =
     "Merges the content of the input files by copying one line of each file "
-	"in a round robin fashion, until all of them have been processed.";
+    "in a round robin fashion, until all of them have been processed.";
 
-std::string usage = "Usage: rrmerge [--help] input-stream [size] "
-					"output-stream [size] input-files; "
-					"\tthere should be at least 2 input files";
+std::string usage =
+    "Usage: rrmerge [--help] input-stream [size] "
+    "output-stream [size] input-files; "
+    "\tthere should be at least 2 input files";
 
 int parse_arguments(int argc, char** argv)
 {
@@ -54,8 +55,8 @@ int parse_arguments(int argc, char** argv)
 
     try {
         po::positional_options_description pos;
-		pos.add("input-files", -1);
-		// - 1 => translate positional options into input-file options
+        pos.add("input-files", -1);
+        // - 1 => translate positional options into input-file options
 
         po::options_description desc("Allowed options");
         desc.add_options()("help,h", "produce help message.")(
@@ -75,12 +76,10 @@ int parse_arguments(int argc, char** argv)
             "bo",
             po::value<int>(),
             "buffer size, if specified, will use a BufferedOutputStream.")(
-            "output-file,o",
-			po::value<std::string>(),
-			"output csv file.")(
+            "output-file,o", po::value<std::string>(), "output csv file.")(
             "input-files,i",
-			po::value<std::vector<std::string>>(),
-			"input csv file.");
+            po::value<std::vector<std::string>>(),
+            "input csv file.");
 
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv)
@@ -142,7 +141,7 @@ int parse_arguments(int argc, char** argv)
         }
 
         if (vm.count("input-files")) {
-			input_files = vm["input-files"].as<std::vector<std::string>>();
+            input_files = vm["input-files"].as<std::vector<std::string>>();
         }
     }
     catch (boost::bad_any_cast const& exc) {
@@ -156,16 +155,14 @@ int parse_arguments(int argc, char** argv)
                   << std::endl;
         return 1;
     }
-	if ( input_files.size() < 2 )
-	{
+    if (input_files.size() < 2) {
         std::cerr << usage << std::endl;
         std::cerr << "At least two input files are necessary." << std::endl;
         return 1;
-	}
+    }
 
     return 0;
 }
-
 
 int main(int argc, char** argv)
 {
@@ -175,37 +172,35 @@ int main(int argc, char** argv)
     }
 
     // initializes the specified streams.
-	std::vector<std::shared_ptr<io::InputStream>> input_streams;
-	for ( int i = 0; i < input_files.size(); i++ )
-	{
-		input_streams.push_back(std::shared_ptr<io::InputStream>());
-	}
+    std::vector<std::shared_ptr<io::InputStream>> input_streams;
+    for (int i = 0; i < input_files.size(); i++) {
+        input_streams.push_back(std::shared_ptr<io::InputStream>());
+    }
 
-	std::shared_ptr<io::OutputStream> output_stream;
+    std::shared_ptr<io::OutputStream> output_stream;
 
     switch (input_type) {
     case SIMPLE:
         std::cout << "Using SimpleInputStream." << std::endl;
-		for ( auto& ptr : input_streams )
-			ptr = std::make_shared<io::SimpleInputStream>();
+        for (auto& ptr : input_streams)
+            ptr = std::make_shared<io::SimpleInputStream>();
         break;
     case STDIO:
         std::cout << "Using StdioInputStream." << std::endl;
-		for ( auto& ptr : input_streams )
-			ptr = std::make_shared<io::StdioInputStream>();
+        for (auto& ptr : input_streams)
+            ptr = std::make_shared<io::StdioInputStream>();
         break;
     case BUFFERED:
         std::cout << "Using BufferedInputStream." << std::endl;
-		for ( auto& ptr : input_streams )
-			ptr = std::make_shared<io::BufferedInputStream>(
-					input_buffered_map_size,
-					input_buffered_map_size);
+        for (auto& ptr : input_streams)
+            ptr = std::make_shared<io::BufferedInputStream>(
+                input_buffered_map_size, input_buffered_map_size);
         break;
     case MMAP:
         std::cout << "Using MMapInputStream." << std::endl;
-		for ( auto& ptr : input_streams )
-			ptr = std::make_shared<io::MMapInputStream>(
-					input_buffered_map_size);
+        for (auto& ptr : input_streams)
+            ptr =
+                std::make_shared<io::MMapInputStream>(input_buffered_map_size);
         break;
     }
 
@@ -221,57 +216,52 @@ int main(int argc, char** argv)
     case BUFFERED:
         std::cout << "Using BufferedOutputStream." << std::endl;
         output_stream = std::make_shared<io::BufferedOutputStream>(
-                output_buffered_map_size);
+            output_buffered_map_size);
         break;
     case MMAP:
         std::cout << "Using MMapOutputStream." << std::endl;
-        output_stream = std::make_shared<io::MMapOutputStream>(
-				output_buffered_map_size);
+        output_stream =
+            std::make_shared<io::MMapOutputStream>(output_buffered_map_size);
         break;
     }
 
     bool input_result = false;
-	auto iss = input_streams.begin();
-	auto ifs = input_files.begin();
-	while (iss != input_streams.end() and ifs != input_files.end())
-	{
-		input_result = (*iss)->open(*ifs);
-		assert(input_result);
-		iss++; ifs ++;
-	}
-	
-	bool output_result = output_stream->create(output_file);
-	assert(output_result);
+    auto iss = input_streams.begin();
+    auto ifs = input_files.begin();
+    while (iss != input_streams.end() and ifs != input_files.end()) {
+        input_result = (*iss)->open(*ifs);
+        assert(input_result);
+        iss++;
+        ifs++;
+    }
+
+    bool output_result = output_stream->create(output_file);
+    assert(output_result);
 
     std::chrono::time_point start = std::chrono::system_clock::now();
-	bool eof = false;
-	int not_eof = 0;
-	while (!eof)
-	{
-		for (auto& input_stream : input_streams)
-		{
-			if (!input_stream->end_of_stream())
-			{
-				std::string line = input_stream->readln();
-				if (!line.empty())
-					std::cout << line; // TODO
-					output_stream->writeln(line);
-				not_eof++;
-			}
-		}
-		
-		if (not_eof > 0)
-			not_eof = 0;
-		else
-			eof = true;
-	}
+    bool eof = false;
+    int not_eof = 0;
+    while (!eof) {
+        for (auto& input_stream : input_streams) {
+            if (!input_stream->end_of_stream()) {
+                std::string line = input_stream->readln();
+                output_stream->writeln(line);
+                not_eof++;
+            }
+        }
+
+        if (not_eof > 0)
+            not_eof = 0;
+        else
+            eof = true;
+    }
     std::chrono::time_point end = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = end - start;
     auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 
     std::cout << " ------ Duration: " << dur.count() << "ms." << std::endl;
 
-	output_stream->close();
+    output_stream->close();
 
     return 0;
 }
