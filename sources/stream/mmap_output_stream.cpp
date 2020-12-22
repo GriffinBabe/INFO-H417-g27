@@ -152,19 +152,9 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         fbuf.close();
     }
 
-	// TODO : REMOVE THIS IF and THIS CONTENT1
-	char content1[1000] = "";
-	if (first_size > 999)
-		memcpy(&content1, text, first_size);
-	else
-		memcpy(&content1, text, 999);
-
-	std::cout << "Content: " << content1 << std::endl;
-	// TODO END
-
     if (first_size > 0)
     { // Copy everything that will fit in the current mapping
-		memcpy(_address, &text, first_size);
+		memcpy(_address, text, first_size);
         _mapped_region.flush(_flush_offset, first_size);
         _flush_offset += first_size;
 		_address += first_size;
@@ -174,7 +164,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     { // Copy what exceeded the previous mapping and require full mapping size
         next_mapping();
         memcpy(_address,
-               &text[first_size + i*_mapping_size],
+               &(text[first_size + i*_mapping_size]),
                _mapping_size);
         _mapped_region.flush(_flush_offset, _mapping_size);
         _flush_offset += _mapping_size;
@@ -185,7 +175,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     { // Copy what exceeded previous mappings but not feeling a whole region
         next_mapping();
         memcpy(_address,
-               &text[first_size + complete_loops*_mapping_size],
+               &(text[first_size + complete_loops*_mapping_size]),
                last_size);
         _mapped_region.flush(_flush_offset, last_size);
         _flush_offset += last_size; // We only flush last_size chars
