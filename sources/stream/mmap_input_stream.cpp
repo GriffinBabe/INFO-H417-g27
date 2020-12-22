@@ -159,7 +159,6 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     bool is_found = false; // indicate if found the character c
     char* char_ptr = nullptr; // pointer to the address of c
 
-
     // Search in the mapping of size _mapping_size if the character is present
     do
     {
@@ -202,7 +201,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     }
 
     // end_cursor - 1 to avoid counting "\n" as a "past character"
-    const uintmax_t past_chars = (_actual_offset + end_cursor - 1)
+    const uintmax_t past_chars = (_actual_offset + end_cursor)
                                  - (backup_offset + backup_cursor);
 
 	// Prepare the char array to receive the data
@@ -214,7 +213,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 
 	// Re-load the backup cursor
 	_cursor = backup_cursor;
-
+	
 	// If no chars were passed (instantaneously found a '\n'), then return
     if (past_chars == 0)
     {
