@@ -46,6 +46,7 @@ std::string io::StdioInputStream::readln()
             break;
         }// to do : add something more dynamic by extanding the buffer with memcpy (or is it efficient ? must avoid overhead)
     }
+    strtok(str, "\n");
     std::string input_str(str);
     return input_str;
 }
