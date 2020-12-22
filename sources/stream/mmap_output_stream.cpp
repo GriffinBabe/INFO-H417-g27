@@ -155,7 +155,8 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     if (first_size > 0)
     { // Copy everything that will fit in the current mapping
 		memcpy(_address, text, first_size);
-        _mapped_region.flush(_flush_offset, first_size);
+		if ( last_size or complete_loops) // Will only flush if region is full
+			_mapped_region.flush(_flush_offset, first_size);
         _flush_offset += first_size;
 		_address += first_size;
     }
@@ -177,10 +178,15 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         memcpy(_address,
                &(text[first_size + complete_loops*_mapping_size]),
                last_size);
-        _mapped_region.flush(_flush_offset, last_size);
+        //_mapped_region.flush(_flush_offset, last_size);
         _flush_offset += last_size; // We only flush last_size chars
 		_address += last_size;
     }
+
+	*_address = '\n';
+	_address += 1;
+	_flush_offset += 1; // We only flush last_size chars
+	_flush_offset %= _mapping_size;
 		
     return true;
 }

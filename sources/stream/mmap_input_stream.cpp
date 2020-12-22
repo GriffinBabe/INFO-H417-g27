@@ -214,7 +214,9 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
                                  - (backup_offset + backup_cursor);
 
 	// Prepare the char array to receive the data
+    //char content[past_chars+1]= "";
     char content[past_chars+1];
+	memset(&content, '\0', past_chars + 1);
 
 	// If a remap has not been necessary, do not remap
 	if (loop_ctr > 1)
