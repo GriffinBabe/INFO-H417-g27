@@ -172,12 +172,12 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 
     for (int i = 0; i < complete_loops; i++)
     { // Copy what exceeded the previous mapping and require full mapping size
-		std::cout << "Flush Offset " <<_flush_offset << std::endl; // TODO
-		std::cout << "Mapping size " <<_mapping_size << std::endl; // TODO
-		std::cout << "Length: "<< length << std::endl; // TODO
 		std::cout << "Yo2" << std::endl; // TODO
         next_mapping();
 		std::cout << "Yo2_remapped" << std::endl; // TODO
+		std::cout << "Flush Offset: " <<_flush_offset << std::endl; // TODO
+		std::cout << "Mapping size: " <<_mapping_size << std::endl; // TODO
+		std::cout << "Length: "<< length << std::endl; // TODO
         memcpy(_address,
                &text[first_size + i*_mapping_size],
                _mapping_size);
