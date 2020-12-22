@@ -56,6 +56,11 @@ private:
           */
          void check_remap();
 
+         /**
+          * Check if it reached the end of file will be necessary
+          */
+         void check_eof();
+
         /**
          * Reset variables to initial values.
          */

@@ -119,6 +119,12 @@ void io::MMapInputStream::MappingHandler::check_remap()
         _need_remap = true;
 }
 
+void io::MMapInputStream::MappingHandler::check_eof()
+{
+	if (_cursor + _actual_offset >= _file_size )
+		_eof = true;
+}
+
 void io::MMapInputStream::MappingHandler::reset_vars()
 {
     _actual_offset = 0;
@@ -164,8 +170,10 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     {
         // If it is not the first pass, do not need to care about backup_cursor
         if (!first_pass)
+		{
             char_ptr = static_cast<char*>(
                 std::memchr(_address, c, _mapping_size));
+		}
         else
         { // If it is the first pass, take the backup_cursor into account
             char_ptr = static_cast<char*>(
@@ -198,10 +206,11 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     {
         end_cursor = _file_size - 1 - _actual_offset;
         is_found = false;
+		_eof = true;
     }
 
     // end_cursor - 1 to avoid counting "\n" as a "past character"
-    const uintmax_t past_chars = (_actual_offset + end_cursor + 1)
+    const uintmax_t past_chars = (_actual_offset + end_cursor )
                                  - (backup_offset + backup_cursor);
 
 	// Prepare the char array to receive the data
@@ -247,13 +256,13 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         {// If the first and last mapped region
             std::memcpy(&content[idx],
                    _address + backup_cursor,
-                   end_cursor + 1 - backup_cursor);
+                   end_cursor - backup_cursor);
         }
         else
         { // If this is the last mapped region
             std::memcpy(&content[idx],
                    _address,
-                   end_cursor+1);
+				   end_cursor);
         }
     }
 
@@ -263,6 +272,9 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 
 	// Check if a remap will be necessary
     check_remap();
+
+	// Check if the current cursor is at the end of the file
+	check_eof();
 
 	// Build the string instance and return it to _content
     _content = std::string(content);
