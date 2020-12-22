@@ -127,6 +127,7 @@ void io::MMapOutputStream::MappingHandler::reset()
 
 bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 {
+	std::cout<<"Welcome"<<std::endl; // TODO
     uint32_t length = strlen(text);
     uint32_t first_size = 0; // In case _flush_offset is not zero
     uint32_t last_size = 0; // In case length is not multiple of _mapping_size
@@ -143,24 +144,34 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         first_size = length;
 	}
 
+	std::cout<<"HelloFILEBUF"<<std::endl; // TODO
     { // Increase the size of the file to allow mapping. It has its own scope.
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
-        fbuf.pubseekoff(_actual_offset + _flush_offset + length - 1,
-						std::ios_base::beg);
+        fbuf.pubseekoff(_actual_offset + _flush_offset + (length-1) + 1,
+						std::ios_base::beg); // + 1 is for the \n character
+		std::cout<<"End of file: "<<_actual_offset + _flush_offset + length <<std::endl; // TODO
         fbuf.sputc(0);
         fbuf.close();
     }
+	std::cout<<"ByeFILEBUF"<<std::endl; // TODO
 
+	std::cout<<"Hello1"<<std::endl; // TODO
     if (first_size > 0)
     { // Copy everything that will fit in the current mapping
+		std::cout<<"Flush offset: "<<_flush_offset<<std::endl; // TODO
+		std::cout<<"Mapping size: "<<_mapping_size<<std::endl; // TODO
+		std::cout<<"First size: "<<first_size<<std::endl; // TODO
+		std::cout<<"Length: "<<length<<std::endl; // TODO
 		memcpy(_address, text, first_size);
+		std::cout<<"MEMCPY OK"<<std::endl; // TODO
 		if ( last_size or complete_loops) // Will only flush if region is full
 			_mapped_region.flush(_flush_offset, first_size);
         _flush_offset += first_size;
 		_address += first_size;
     }
 
+	std::cout<<"Hello2"<<std::endl; // TODO
     for (int i = 0; i < complete_loops; i++)
     { // Copy what exceeded the previous mapping and require full mapping size
         next_mapping();
@@ -172,6 +183,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		_address += _mapping_size;
     }
 
+	std::cout<<"Hello3"<<std::endl; // TODO
     if (last_size > 0)
     { // Copy what exceeded previous mappings but not feeling a whole region
         next_mapping();
@@ -183,10 +195,13 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		_address += last_size;
     }
 
+	std::cout<<"Hello4"<<std::endl; // TODO
 	*_address = '\n';
 	_address += 1;
 	_flush_offset += 1; // We only flush last_size chars
 	_flush_offset %= _mapping_size;
+
+	std::cout<<"Goodbye"<<std::endl; // TODO
 		
     return true;
 }
