@@ -102,8 +102,6 @@ bool io::MMapInputStream::MappingHandler::remap(uintmax_t offset)
         _need_remap = false;
         if (offset + _mapping_size < _file_size -1)
             _eof = false;
-        else
-            _eof = true;
         return true;
     }
     else
