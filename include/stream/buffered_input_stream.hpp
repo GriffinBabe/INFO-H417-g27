@@ -35,7 +35,7 @@ private:
          * @param str the StringBuffer to copy data into.
          * @return false is the eol or eof is reached. true otherwise.
          */
-        bool read(util::StringBuffer& str);
+        bool read_buffer(util::StringBuffer& str);
 
         /**
          * Reloads the buffer.

@@ -60,8 +60,9 @@ bool io::SimpleOutputStream::close()
         return true;
     }
     int ret_status = fclose(_file);
+    int flush_status = fflush(_file);
     if (ret_status == 0) {
         _file_open = false;
     }
-    return ret_status == 0;
+    return ret_status == 0 && flush_status == 0;
 }

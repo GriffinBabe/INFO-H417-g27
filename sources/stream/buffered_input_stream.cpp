@@ -2,6 +2,7 @@
 #include <iostream>
 #include <assert.h>
 #include <cstring>
+#include <unistd.h>
 
 io::BufferedInputStream::BufferedInputStream(std::uint32_t read_size,
                                              std::uint32_t buffer_size)
@@ -42,7 +43,7 @@ std::string io::BufferedInputStream::readln()
     }
     _buffer.reset();
 
-    while (_reader.read(_buffer));
+    while (_reader.read_buffer(_buffer));
 
     return _buffer.get();
 }
@@ -74,7 +75,7 @@ io::BufferedInputStream::BufferReader::BufferReader(FILE* file,
     _eof = reset();
 }
 
-bool io::BufferedInputStream::BufferReader::read(util::StringBuffer& str)
+bool io::BufferedInputStream::BufferReader::read_buffer(util::StringBuffer& str)
 {
     if (_cursor > _cur_read - 1) {
         if (!_eof) {
