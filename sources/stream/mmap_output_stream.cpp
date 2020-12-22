@@ -144,7 +144,6 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 	{ // All fit in the current mapping
 		std::cout << "HelloSecond" << std::endl; // TODO
         first_size = length;
-        //first_size = length - _mapping_size - (_flush_offset+1);
 	}
 
 	std::cout << "Length: " << length << std::endl; // TODO
@@ -152,11 +151,9 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		std::cout << "Increase size START" << std::endl; // TODO
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
-        //fbuf.pubseekoff(_actual_offset + length + 1, std::ios_base::beg);
         fbuf.pubseekoff(_actual_offset + _flush_offset + length + 1,
-						std::ios_base::beg); // FIXME this one seems correct
-        fbuf.sputc(0); // FIXME this one seems better than '\n' to end file
-        //fbuf.sputc('\n'); // TODO it is better now with the eof char
+						std::ios_base::beg);
+        fbuf.sputc(0);
 		std::cout << "New size of file: " << // TODO
 			_actual_offset + _flush_offset + length + 1 << std::endl; // TODO
         fbuf.close();
@@ -208,7 +205,6 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     }
 	std::cout << "Flush Offset: "<< _flush_offset << std::endl; // TODO
 	std::cout << "YoEND" << std::endl; // TODO
-    //_actual_offset += 1; // TODO: why was this here?
 	_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
 	//*_address += _flush_offset; // FIXME --- /!\ will bug at "Yo3" /!\
 	// bug ~ BUS ERROR, happens during memcpy after the eventual remapping,
