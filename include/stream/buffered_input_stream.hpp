@@ -46,7 +46,13 @@ private:
          */
         bool reset();
 
-        [[ nodiscard ]] bool eof() const;
+        /**
+         * Returns true if the buffer has reached the end of file
+         * and all the buffer has been read.
+         *
+         * @return the _eof class value.
+         */
+        [[ nodiscard ]] bool eof_reached() const;
 
     private:
         /**

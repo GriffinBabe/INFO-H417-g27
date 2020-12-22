@@ -56,7 +56,7 @@ bool io::BufferedInputStream::seek(std::uint32_t pos)
 
 bool io::BufferedInputStream::end_of_stream() const
 {
-    return _reader.eof();
+    return _reader.eof_reached();
 }
 
 //-------------------------------------------------------------------
@@ -71,28 +71,29 @@ io::BufferedInputStream::BufferReader::BufferReader(FILE* file,
     int ret_state = fseek(_file, 0, SEEK_SET);
     assert(ret_state == 0);
     _ptr = std::unique_ptr<char>(new char[_read_size]);
-    _eof_reached = reset();
+    _eof = reset();
 }
 
 bool io::BufferedInputStream::BufferReader::read(util::StringBuffer& str)
 {
     if (_cursor > _cur_read - 1) {
-        if (!_eof_reached) {
+        if (!_eof) {
             _eof = reset();
         }
         else {
-            _eof = true;
+            _eof_reached = true;
             return false;
         }
     }
     // look for an occurrence of \n in the buffer content
     char* end_of_line = strstr(_ptr.get() + _cursor, "\n");
 
-    // copy all the content
+    // there is no end of line in the buffer, so we keep reading
     if (end_of_line == nullptr) {
-        str.add(_ptr.get() + _cursor, _read_size - _cursor + 1);
+        str.add(_ptr.get() + _cursor, _read_size - _cursor);
         _cursor = _read_size;
     }
+    // there is the EOL in the buffer ,so we copy until that.
     else {
         str.add(_ptr.get() + _cursor, end_of_line - _ptr.get() - _cursor);
         _cursor += (end_of_line - _ptr.get()) - _cursor + 1;
@@ -115,8 +116,8 @@ bool io::BufferedInputStream::BufferReader::reset()
     return (_cur_read < _read_size);
 }
 
-bool io::BufferedInputStream::BufferReader::eof() const
+bool io::BufferedInputStream::BufferReader::eof_reached() const
 {
-    return _eof;
+    return _eof_reached;
 }
 

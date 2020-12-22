@@ -62,7 +62,8 @@ for file in database_folder_files:
         results['length']['fgets'][file] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
 # length program buffered stream
-buffer_sizes = [1000, 4096, 8192, 15000, 30000, 100000, 500000, 1000000]
+# 4kb, 100kB, 1MB, 100MB, 500MB
+buffer_sizes = [4096, 100000, 1000000, 100000000, 500000000]
 for file in database_folder_files:
         results['length']['buffered'][file] = {}
         for b_size in buffer_sizes:
@@ -107,7 +108,7 @@ for file in database_folder_files:
         results['length']['simple'][file] = (elapsed, os.path.getsize(database_folder+'/'+file))
 command = '{}{} {} {} {}{} {}'
 jumps = 20000 # 20k random jumps will be repeated
-# length program fgets stream
+# randjump program fgets stream
 for file in database_folder_files:
         # fgets stream
         _command = command.format(executable_folder, 'randjump', '-f', '', database_folder, file, jumps).split(' ')
@@ -120,8 +121,8 @@ for file in database_folder_files:
         print(elapsed)
         results['randjump']['fgets'][file] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
-# length program buffered stream
-buffer_sizes = [1000, 4096, 8192, 15000, 30000, 100000, 500000, 1000000]
+# randjump program buffered stream
+buffer_sizes = [4096, 100000, 1000000, 100000000, 500000000]
 for file in database_folder_files:
         results['randjump']['buffered'][file] = {}
         for b_size in buffer_sizes:
@@ -136,7 +137,7 @@ for file in database_folder_files:
                 print(elapsed)
                 results['randjump']['buffered'][file][b_size] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
-# length program mmap stream
+# randjump program mmap stream
 for file in database_folder_files:
         file_path = database_folder+"/"+file
         size = os.path.getsize(file_path)
@@ -153,7 +154,7 @@ for file in database_folder_files:
                 print(elapsed)
                 results['randjump']['mmap'][file][b_size] = (elapsed, os.path.getsize(database_folder+'/'+file))
 
-# length program simple stream
+# randjump program simple stream
 for file in database_folder_files:
         # fgets stream
         _command = command.format(executable_folder, 'randjump', '-s', '', database_folder, file, jumps).split(' ')
