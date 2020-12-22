@@ -66,20 +66,22 @@ int parse_arguments(int argc, char** argv)
 
     return 0;
 }
+
 //returns the k-th elem of the line
-std::string extract_row_elem(std::string input){
+std::string extract_row_elem(std::string* input){
     std::vector <std::string> rows;
     std::string buff;
-    std::stringstream iss(input);
-    while(std::getline(iss,buff, ','))
+    std::stringstream iss(*input);
+    while(std::getline(iss,buff, ',') && rows.size() < in_k )
     {
         rows.push_back(buff);
     }
     return rows[in_k-1];
 }
+
 //sort lines by their k-th elem
-int sort_list(std::vector<std::string> _lines){
-    std::map<int, std::string> hashmap_lines;
+int sort_list(std::map<int, std::string> _hashmap){
+    //comparing two string with std::compare is efficient for sorting
 }
 
 int read_line(){
@@ -87,16 +89,15 @@ int read_line(){
         std::make_unique<io::StdioInputStream>();
     stream->open(input_file);
     int16_t size = 0; //actual size in byte of all the line stored in the list
-    std::vector<std::string> lines; //list of lines already read
+    std::map<int, std::string> hashmap_lines; //hashmap of lines already read
     int count = 0;
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
-        count ++;
         uint16_t string_size = line.length();
         if (!line.empty()) {
-            extract_row_elem(line);
+            count ++;
             if (size + string_size < in_M) { // if the capacity isn't exceeded
-                lines.push_back(line);
+                hashmap_lines.insert(std::pair<int,std::string>(count,line));
                 size += string_size;
             }
             else {
@@ -107,7 +108,7 @@ int read_line(){
             }
         }
     }
-    if(!lines.empty()){ // If the list isn't empty, process it
+    if(!hashmap_lines.empty()){ // If the list isn't empty, process it
         // CALL SORT FUNCTION ON THIS LIST
         // CALL OUTPUT FUNCTION TO WRITE A NEW OUTPUT FILE
     }
