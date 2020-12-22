@@ -168,6 +168,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		std::cout << "Yo1_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, first_size);
         _flush_offset += first_size;
+		_address += first_size;
     }
 
     for (int i = 0; i < complete_loops; i++)
@@ -184,6 +185,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		std::cout << "Yo2_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, _mapping_size);
         _flush_offset += _mapping_size; // FIXME line was added, full mapping
+		_address += _mapping_size;
     }
 
     if (last_size > 0)
@@ -202,10 +204,13 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
 		std::cout << "Yo3_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, last_size);
         _flush_offset += last_size; // We only flush last_size chars
+		_address += last_size;
     }
 	std::cout << "Flush Offset: "<< _flush_offset << std::endl; // TODO
 	std::cout << "YoEND" << std::endl; // TODO
-	_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
+	// FIXME : options below have been splitted amongs the 3 parts above,
+	// but the problem is still valid
+	//_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
 	//*_address += _flush_offset; // FIXME --- /!\ will bug at "Yo3" /!\
 	// bug ~ BUS ERROR, happens during memcpy after the eventual remapping,
 	// if there is one
