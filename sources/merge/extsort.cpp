@@ -4,7 +4,7 @@
 #include <stream/input_stdio_stream.hpp>
 #include <stream/ouput_stdio_stream.hpp>
 #include <stream/output_stream.hpp>
-
+#include <map>
 namespace po = boost::program_options;
 
 std::string input_file;
@@ -66,16 +66,35 @@ int parse_arguments(int argc, char** argv)
 
     return 0;
 }
+//returns the k-th elem of the line
+std::string extract_row_elem(std::string input){
+    std::vector <std::string> rows;
+    std::string buff;
+    std::stringstream iss(input);
+    while(std::getline(iss,buff, ','))
+    {
+        rows.push_back(buff);
+    }
+    return rows[in_k-1];
+}
+//sort lines by their k-th elem
+int sort_list(std::vector<std::string> _lines){
+    std::map<int, std::string> hashmap_lines;
+}
+
 int read_line(){
     std::unique_ptr<io::InputStream> stream =
         std::make_unique<io::StdioInputStream>();
     stream->open(input_file);
     int16_t size = 0; //actual size in byte of all the line stored in the list
     std::vector<std::string> lines; //list of lines already read
+    int count = 0;
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
+        count ++;
         uint16_t string_size = line.length();
         if (!line.empty()) {
+            extract_row_elem(line);
             if (size + string_size < in_M) { // if the capacity isn't exceeded
                 lines.push_back(line);
                 size += string_size;
@@ -100,9 +119,7 @@ int main(int argc, char** argv)
         return ret_status;
     }
     //on devra utiliser la combinaison read/write optimale trouvée au point 1.3
-    //en attendant ces streams sont utilisés de manière temporaire
+    //en attendant des streams stdio sont utilisés de manière temporaire
     read_line();
-
-
 
 }
