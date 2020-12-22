@@ -11,6 +11,7 @@ std::string input_file;
 u_int32_t in_M = 0;
 int in_k = 1;
 int in_d = 1;
+int output_count = 1; //todo : implements queue to keep files reference
 
 int parse_arguments(int argc, char** argv)
 {
@@ -79,6 +80,18 @@ std::string extract_row_elem(std::string* input){
     return rows[in_k-1];
 }
 
+void output_file(std::map<int, std::string>* _hashmap){
+    std::string output_file_path =
+        std::string(OUTPUT_DIR) + "/output_"+std::to_string(output_count)+".txt";
+    std::unique_ptr<io::OutputStream> stream = std::make_unique<io::StdioOutputStream>();
+    stream->create(output_file_path);
+    for(int i = 0; i<(*_hashmap).size() ; i++){
+        stream->writeln((*_hashmap).at(i));
+    }
+    stream->close(); // TODO : just create stream at main call
+    output_count++;
+}
+
 //sort lines by their k-th elem // TODO: optimise memory usage
 int sort_map(std::map<int, std::string>* _hashmap){
     std::string *temp;
@@ -122,6 +135,7 @@ int read_line(){
                 sort_map(&hashmap_lines);
                 // CALL OUTPUT FUNCTION TO WRITE A NEW OUTPUT FILE
                 // FLUSH LIST AND ADD THE OVERFLOW LINE IN IT
+                output_file(&hashmap_lines);
                 hashmap_lines.clear();
                 count = 0;
                 hashmap_lines.insert(std::pair<int,std::string>(count,line));
@@ -133,6 +147,8 @@ int read_line(){
     if(!hashmap_lines.empty()){ // If the list isn't empty, process it
         // CALL SORT FUNCTION ON THIS LIST
         // CALL OUTPUT FUNCTION TO WRITE A NEW OUTPUT FILE
+        sort_map(&hashmap_lines);
+        output_file(&hashmap_lines);
     }
 }
 int main(int argc, char** argv)
