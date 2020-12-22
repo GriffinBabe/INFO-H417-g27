@@ -8,9 +8,9 @@
 namespace po = boost::program_options;
 
 std::string input_file;
-int16_t in_M = 0;
-int8_t in_k = 1;
-int16_t in_d = 1;
+u_int32_t in_M = 0;
+int in_k = 1;
+int in_d = 1;
 
 int parse_arguments(int argc, char** argv)
 {
@@ -21,10 +21,10 @@ int parse_arguments(int argc, char** argv)
         po::positional_options_description pos;
         pos.add("input-file", 1);
         po::options_description desc("Allowed options");
-        desc.add_options()("k",po::value<int8_t>(),"k-th column")
+        desc.add_options()("k",po::value<int>(),"k-th column")
             ("input-file", po::value<std::string>(), "input csv file.")
-            ("M",po::value<int16_t>(),"size of the line buffer")
-            ("d",po::value<int16_t>(),"number of first elem in the queue to be merged");
+            ("M",po::value<u_int32_t >(),"size of the line buffer")
+            ("d",po::value<int>(),"number of first elem in the queue to be merged");
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv)
                       .options(desc)
@@ -50,9 +50,9 @@ int parse_arguments(int argc, char** argv)
         }
         input_file = vm["input-file"].as<std::string>();
         input_file = std::string(RESOURCES_DIR) + "/" + input_file;
-        in_M = vm["M"].as<int16_t>();
-        in_d = vm["d"].as<int16_t>();
-        in_k = vm["k"].as<int8_t>();
+        in_M = vm["M"].as<u_int32_t>();
+        in_d = vm["d"].as<int>();
+        in_k = vm["k"].as<int>();
     }
     catch (boost::bad_any_cast const& exc) {
         std::cerr << "Bad parameter type: " << exc.what() << std::endl;
@@ -79,9 +79,25 @@ std::string extract_row_elem(std::string* input){
     return rows[in_k-1];
 }
 
-//sort lines by their k-th elem
-int sort_list(std::map<int, std::string> _hashmap){
-    //comparing two string with std::compare is efficient for sorting
+//sort lines by their k-th elem // TODO: optimise memory usage
+int sort_map(std::map<int, std::string>* _hashmap){
+    std::string *temp;
+    std::string *elemjm1;
+    std::string *elemj;
+    //insertion sorting algorithm
+    for(int i = 1; i < (*_hashmap).size() ; i++){
+        int j = i;
+        elemjm1=&((*_hashmap).at(j-1)); // pointer to line j-1
+        elemj=&((*_hashmap).at(j)); // pointer to line j
+        // while line j-1 is greater than line j (alphabetical comparison)
+        while(j > 0 && extract_row_elem(elemjm1).compare(extract_row_elem(elemj)) > 0 ){
+            temp = elemjm1;
+            // swap the lines
+            (*_hashmap).insert(std::pair<int,std::string>(j-1,*elemj));
+            (*_hashmap).insert(std::pair<int,std::string>(j,*temp));
+            j-=1;
+        }
+    }
 }
 
 int read_line(){
@@ -89,21 +105,27 @@ int read_line(){
         std::make_unique<io::StdioInputStream>();
     stream->open(input_file);
     int16_t size = 0; //actual size in byte of all the line stored in the list
-    std::map<int, std::string> hashmap_lines; //hashmap of lines already read
+    std::map<int, std::string> hashmap_lines ; //hashmap of lines already read
     int count = 0;
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
-        uint16_t string_size = line.length();
+        u_int32_t string_size = line.length();
         if (!line.empty()) {
-            count ++;
             if (size + string_size < in_M) { // if the capacity isn't exceeded
                 hashmap_lines.insert(std::pair<int,std::string>(count,line));
+                count ++;
                 size += string_size;
+
             }
             else {
-                // CALL SORT FUNCTION ON THIS LIST
+                // CALL SORT FUNCTION ON THIS MAP
+                sort_map(&hashmap_lines);
                 // CALL OUTPUT FUNCTION TO WRITE A NEW OUTPUT FILE
                 // FLUSH LIST AND ADD THE OVERFLOW LINE IN IT
+                hashmap_lines.clear();
+                count = 0;
+                hashmap_lines.insert(std::pair<int,std::string>(count,line));
+                count++;
                 size = string_size;
             }
         }
