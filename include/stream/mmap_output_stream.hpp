@@ -4,7 +4,6 @@
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include "stream/output_stream.hpp"
-#include <iostream> // TODO
 
 namespace bip = boost::interprocess;
 namespace sfs = std::filesystem;
@@ -149,11 +148,6 @@ private:
          * Size of pages.
          */
         std::size_t _page_size;
-
-		/**
-		 * Indicate if a remapping operation is necessary
-		 */
-		bool _need_remap = false; // FIXME
 
         /**
          * Indicate if the file was created

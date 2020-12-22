@@ -53,7 +53,7 @@ std::string io::MMapInputStream::readln()
 
 bool io::MMapInputStream::seek(std::uint32_t pos)
 {
-    return _mapping_handler.remap(pos);
+	return _mapping_handler.seek(pos);
 }
 
 bool io::MMapInputStream::end_of_stream() const
@@ -279,6 +279,20 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 	// Build the string instance and return it to _content
     _content = std::string(content);
     return is_found;
+}
+
+bool io::MMapInputStream::MappingHandler::seek(std::uint32_t pos)
+{
+	uintmax_t max_range = _actual_offset + _mapping_size;
+	if ( pos >= _actual_offset and pos < max_range )
+	{
+		_cursor = pos - _actual_offset;
+		return true;
+	}
+	else
+	{
+		return remap(pos);
+	}
 }
 
 std::string io::MMapInputStream::MappingHandler::get_content()

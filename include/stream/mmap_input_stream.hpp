@@ -79,12 +79,13 @@ private:
          */
         bool read_until_char(char c);
 
-		/**
-		 * Read
-		 *
-		 */
-		bool search_in_region(char c, uintmax_t size);
-        
+        /**
+         * Jump to the given position.
+         * @param pos, position in the file on which to jump
+         * @return bool, if the char was found
+         */
+        bool seek(std::uint32_t pos);
+
 		/**
          * Return content stored in the char array _content.
          * Content is mainly fed using read_until_char method.
