@@ -133,18 +133,19 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     uint32_t last_size = 0; // In case length is not multiple of _mapping_size
     uint32_t complete_loops = 0; // Number of full memcpy to perform.
     if ( _mapping_size - _flush_offset < length )
-    {
+    { // If the content cannot fit in the actual mapping: 3 parts
 		std::cout << "HelloFirst" << std::endl; // TODO
         first_size = _mapping_size - _flush_offset; // If 0, remap occurs.
-        last_size = (length - first_size) % _mapping_size;
+        last_size = (length - first_size) % _mapping_size; // What exceeds
         complete_loops = (length - first_size - last_size) / _mapping_size;
+		// Number of loops using the complete mapping size
     }
     else
-	{
+	{ // All fit in the current mapping
 		std::cout << "HelloSecond" << std::endl; // TODO
         first_size = length;
-	}
         //first_size = length - _mapping_size - (_flush_offset+1);
+	}
 
 	std::cout << "Length: " << length << std::endl; // TODO
     { // Increase the size of the file to allow mapping. It has its own scope.
@@ -153,18 +154,18 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
         //fbuf.pubseekoff(_actual_offset + length + 1, std::ios_base::beg);
         fbuf.pubseekoff(_actual_offset + _flush_offset + length + 1,
-						std::ios_base::beg); // FIXME
-        fbuf.sputc(0);
+						std::ios_base::beg); // FIXME this one seems correct
+        fbuf.sputc(0); // FIXME this one seems better than '\n' to end file
+        //fbuf.sputc('\n'); // TODO it is better now with the eof char
 		std::cout << "New size of file: " << // TODO
 			_actual_offset + _flush_offset + length + 1 << std::endl; // TODO
-        //fbuf.sputc('\n'); // TODO
         fbuf.close();
 		std::cout << "Increase size END" << std::endl; // TODO
     }
 
 	std::cout << "YoSTART" << std::endl; // TODO
     if (first_size > 0)
-    {
+    { // Copy everything that will fit in the current mapping
 		std::cout << "Yo1" << std::endl; // TODO
 		memcpy(_address, &text, first_size);
 		std::cout << "Yo1_memcpied" << std::endl; // TODO
@@ -173,7 +174,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
     }
 
     for (int i = 0; i < complete_loops; i++)
-    {
+    { // Copy what exceeded the previous mapping and require full mapping size
 		std::cout << "Flush Offset " <<_flush_offset << std::endl; // TODO
 		std::cout << "Mapping size " <<_mapping_size << std::endl; // TODO
 		std::cout << "Length: "<< length << std::endl; // TODO
@@ -185,11 +186,11 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
                _mapping_size);
 		std::cout << "Yo2_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, _mapping_size);
-        _flush_offset += _mapping_size; // FIXME line was added
+        _flush_offset += _mapping_size; // FIXME line was added, full mapping
     }
 
     if (last_size > 0)
-    {
+    { // Copy what exceeded previous mappings but not feeling a whole region
 		std::cout << "Yo3" << std::endl; // TODO
         next_mapping();
 		std::cout << "Yo3_remapped" << std::endl; // TODO
@@ -203,8 +204,9 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
                last_size); // FIXME
 		std::cout << "Yo3_memcpied" << std::endl; // TODO
         _mapped_region.flush(_flush_offset, last_size);
-        _flush_offset += last_size;
+        _flush_offset += last_size; // We only flush last_size chars
     }
+	std::cout << "Flush Offset: "<< _flush_offset << std::endl; // TODO
 	std::cout << "YoEND" << std::endl; // TODO
     //_actual_offset += 1; // TODO: why was this here?
 	_address += _flush_offset; // FIXME --- /!\ will bug at "Yo1" /!\
