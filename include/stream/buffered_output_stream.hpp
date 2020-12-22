@@ -32,7 +32,7 @@ private:
          * @param c the character to add to the buffer.
          * @return if the character was successfully added.
          */
-        bool write(char c);
+        bool write_buffer(char c);
 
         /**
          * Writes all the buffer content to the file and resets

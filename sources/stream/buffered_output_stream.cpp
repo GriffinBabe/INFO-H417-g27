@@ -1,6 +1,7 @@
 #include "stream/buffered_output_stream.hpp"
 #include <iostream>
 #include <assert.h>
+#include <unistd.h>
 
 io::BufferedOutputStream::~BufferedOutputStream()
 {
@@ -41,18 +42,18 @@ bool io::BufferedOutputStream::writeln(std::string str)
     }
     auto str_iterator = str.begin();
     while (str_iterator != str.end()) {
-        if (!_writer.write(*str_iterator)) {
+        if (!_writer.write_buffer(*str_iterator)) {
             return false;
         }
         str_iterator++;
     }
     if (str.back() != '\n') {
         const char new_line = '\n';
-        if (!_writer.write(new_line)) {
+        if (!_writer.write_buffer(new_line)) {
             return false;
         }
     }
-    return _writer.flush();
+    return true;
 }
 
 bool io::BufferedOutputStream::close()
@@ -61,11 +62,12 @@ bool io::BufferedOutputStream::close()
         std::cout << "Warning: File is already closed." << std::endl;
         return true;
     }
+    bool flushed = _writer.flush();
     int ret_status = fclose(_file);
     if (ret_status == 0) {
         _file_open = false;
     }
-    return ret_status == 0;
+    return ret_status == 0 && flushed;
 }
 
 // ---------------------------------------------------------
@@ -88,7 +90,7 @@ io::BufferedOutputStream::BufferWriter::BufferWriter(FILE* file,
     _ptr = std::unique_ptr<char>(new char[_write_size]);
 }
 
-bool io::BufferedOutputStream::BufferWriter::write(char c)
+bool io::BufferedOutputStream::BufferWriter::write_buffer(char c)
 {
     if (_cursor >= _write_size) {
         if (!flush())
@@ -100,8 +102,9 @@ bool io::BufferedOutputStream::BufferWriter::write(char c)
 
 bool io::BufferedOutputStream::BufferWriter::flush()
 {
-    int wrote_characters = fwrite(_ptr.get(), sizeof(char), _cursor, _file);
+    int wrote_characters = write(fileno(_file), _ptr.get(), sizeof(char) * _cursor);
+    int flush_status = fflush(_file);
     bool success = wrote_characters == _cursor;
     _cursor = 0;
-    return success;
+    return success && (flush_status == 0);
 }
