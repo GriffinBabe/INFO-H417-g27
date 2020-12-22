@@ -152,6 +152,16 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         fbuf.close();
     }
 
+	// TODO : REMOVE THIS IF and THIS CONTENT1
+	char content1[1000] = "";
+	if (first_size > 999)
+		memcpy(&content1, text, first_size);
+	else
+		memcpy(&content1, text, 999);
+
+	std::cout << "Content: " << content1 << std::endl;
+	// TODO END
+
     if (first_size > 0)
     { // Copy everything that will fit in the current mapping
 		memcpy(_address, &text, first_size);
