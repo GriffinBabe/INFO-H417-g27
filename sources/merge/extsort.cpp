@@ -69,8 +69,11 @@ int parse_arguments(int argc, char** argv)
     return 0;
 }
 
-//returns the k-th elem of the line
-std::string* extract_row_elem(std::string* input){ //TODO : consider row element starting and ending with "
+/**
+ * Takes as parameter a line from the file
+ * and returns the k-th element from it
+ */
+std::string* extract_row_elem(std::string* input){ //TODO : consider row element starting and ending with "  (cf names)
     std::vector <std::string> rows ;
     std::string buff;
     std::stringstream iss(*input);
@@ -80,7 +83,9 @@ std::string* extract_row_elem(std::string* input){ //TODO : consider row element
     }
     return new std::string(rows[in_k-1]);;
 }
-
+/**
+ * output in order the content of the sorted hashmap in a new file
+ */
 void output_file(std::map<int, std::string>* _hashmap){
     std::string output_file_path =
         std::string(OUTPUT_DIR) + "/output_"+std::to_string(output_count)+".txt";
@@ -93,39 +98,51 @@ void output_file(std::map<int, std::string>* _hashmap){
     output_count++;
 }
 
+/**
+ * returns true if the string is only composed of digits chars
+ */
 bool is_number(std::string* a)
 {
     std::string::const_iterator it = (*a).begin();
     while (it != (*a).end() && std::isdigit(*it)) ++it;
-    return !(*a).empty() && it == (*a).end(); //returns true if the string is only composed of digits char
+    return !(*a).empty() && it == (*a).end();
 }
 
+/**
+ * Takes as argument the two string to compare
+ * and returns True if (*a) is superior in front of (*b)
+ */
 bool compare_rows(std::string* a, std::string* b){
     bool resp = false;
     if(isRowNumber){
-        resp = stoi(*a)>stoi(*b);
+        resp = stoi(*a)>stoi(*b);  //numerical
     }
     else{
-        resp =(*a).compare(*b)>0;
+        resp =(*a).compare(*b)>0; //alphabetical difference
     }
-    delete(a); delete(b);
+    delete(a); delete(b); //free memory otherwise those useless pointers stay on the heap
     return resp;
 }
-//sort lines by their k-th elem // TODO: optimise memory usage
+/**
+ * Sort the hashmap using insertion sorting algorithm
+ */
+//TODO: optimise memory usage
 int sort_map(std::map<int, std::string>* _hashmap){
     std::string temp;
     std::string *elemjm1;
     std::string *elemj;
+
     //insertion sorting algorithm
     for(int i = 1; i < (*_hashmap).size() ; i++){
         int j = i;
         elemjm1=&((*_hashmap).at(j-1)); // pointer to line j-1
         elemj=&((*_hashmap).at(j)); // pointer to line j
+
         // while elem k-th in line j-1 is greater than line j (alphabetical comparison)
         while(j > 0 && compare_rows(extract_row_elem(elemjm1),extract_row_elem(elemj))){
             temp = *elemjm1;
+
             // swap the lines
-            std::cout<<"hey"<<std::endl;
             auto const result = (*_hashmap).insert(std::pair<int,std::string>(j-1,*elemj));
             if (not result.second) { result.first->second = *elemj; }
 
@@ -141,22 +158,26 @@ int sort_map(std::map<int, std::string>* _hashmap){
     }
 }
 
+/**
+ * Read the input file line by line and proceed to output it in [N/M] pre-sorted files
+ */
 int read_line(){
     std::unique_ptr<io::InputStream> stream =
         std::make_unique<io::StdioInputStream>();
     stream->open(input_file);
     int16_t size = 0; //actual size in byte of all the line stored in the list
     std::map<int, std::string> hashmap_lines ; //hashmap of lines already read
+    u_int32_t string_size;
     int count = 0;
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
-        if(count==0 and output_count==1){
+        if(count==0 and output_count==1){ // at the beginning check if k-th elem in row is number or not
             std::string *temp = extract_row_elem(&line);
             isRowNumber = is_number(temp);
         }
-        u_int32_t string_size = line.length();
+        string_size = line.length();
         if (!line.empty()) {
-            if (size + string_size < in_M) { // if the capacity isn't exceeded
+            if (size + string_size < in_M) { // if the capacity of the list in kB isn't exceeded
                 hashmap_lines.insert(std::pair<int,std::string>(count,line));
                 count ++;
                 size += string_size;
