@@ -5,6 +5,7 @@
 #include <stream/ouput_stdio_stream.hpp>
 #include <stream/output_stream.hpp>
 #include <map>
+#include <cstring>
 namespace po = boost::program_options;
 
 std::string input_file;
@@ -73,13 +74,25 @@ int parse_arguments(int argc, char** argv)
  * Takes as parameter a line from the file
  * and returns the k-th element from it
  */
-std::string* extract_row_elem(std::string* input){ //TODO : consider row element starting and ending with "  (cf names)
+std::string* extract_row_elem(std::string* input){
     std::vector <std::string> rows ;
     std::string buff;
     std::stringstream iss(*input);
+    std::string temp;
     while(std::getline(iss,buff, ',') && rows.size() < in_k )
     {
-        rows.push_back(buff);
+        if(buff[0]==char('\"')){  //some rows like name rows cannot be only separated by ',' otherwise information is lost
+            temp+=buff;
+            temp+=',';
+        }
+        else if(buff.back()==char('\"')){
+            temp+=buff;
+            rows.push_back(temp);
+            temp="";
+        }
+        else{
+            rows.push_back(buff);
+        }
     }
     return new std::string(rows[in_k-1]);;
 }
@@ -165,9 +178,9 @@ int read_line(){
     std::unique_ptr<io::InputStream> stream =
         std::make_unique<io::StdioInputStream>();
     stream->open(input_file);
-    int16_t size = 0; //actual size in byte of all the line stored in the list
+    u_int32_t size = 0; //actual size in byte of all the line stored in the list
     std::map<int, std::string> hashmap_lines ; //hashmap of lines already read
-    u_int32_t string_size;
+    u_int32_t string_size; //size of the line being read
     int count = 0;
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
