@@ -79,16 +79,23 @@ std::string* extract_row_elem(std::string* input){
     std::string buff;
     std::stringstream iss(*input);
     std::string temp;
+    bool string = false;
     while(std::getline(iss,buff, ',') && rows.size() < in_k )
     {
-        if(buff[0]==char('\"')){  //some rows like name rows cannot be only separated by ',' otherwise information is lost
+        if(buff[0]==char('\"') && buff.back()!=char('\"') && !string){  //string rows like name rows must be separated by "
             temp+=buff;
             temp+=',';
+            string = true;
         }
-        else if(buff.back()==char('\"')){
+        else if(buff.back()==char('\"') && string){
             temp+=buff;
             rows.push_back(temp);
             temp="";
+            string = false;
+        }
+        else if(string){
+            temp+=buff;
+            temp+=',';
         }
         else{
             rows.push_back(buff);
@@ -131,7 +138,7 @@ bool compare_rows(std::string* a, std::string* b){
         resp = stoi(*a)>stoi(*b);  //numerical
     }
     else{
-        resp =(*a).compare(*b)>0; //alphabetical difference
+        resp = (*a).compare(*b)>0; //alphabetical difference
     }
     delete(a); delete(b); //free memory otherwise those useless pointers stay on the heap
     return resp;
