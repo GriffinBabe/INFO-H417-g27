@@ -12,6 +12,7 @@ u_int32_t in_M = 0;
 int in_k = 1;
 int in_d = 1;
 int output_count = 1; //todo : implements queue to keep files reference
+bool isRowNumber = false; // is true if the rows k-th is consisted of numbers
 
 int parse_arguments(int argc, char** argv)
 {
@@ -69,15 +70,15 @@ int parse_arguments(int argc, char** argv)
 }
 
 //returns the k-th elem of the line
-std::string extract_row_elem(std::string* input){
-    std::vector <std::string> rows;
+std::string* extract_row_elem(std::string* input){ //TODO : consider row element starting and ending with "
+    std::vector <std::string> rows ;
     std::string buff;
     std::stringstream iss(*input);
     while(std::getline(iss,buff, ',') && rows.size() < in_k )
     {
         rows.push_back(buff);
     }
-    return rows[in_k-1];
+    return new std::string(rows[in_k-1]);;
 }
 
 void output_file(std::map<int, std::string>* _hashmap){
@@ -88,10 +89,28 @@ void output_file(std::map<int, std::string>* _hashmap){
     for(int i = 0; i<(*_hashmap).size() ; i++){
         stream->writeln((*_hashmap).at(i));
     }
-    stream->close(); // TODO : just create stream at main call
+    stream->close();
     output_count++;
 }
 
+bool is_number(std::string* a)
+{
+    std::string::const_iterator it = (*a).begin();
+    while (it != (*a).end() && std::isdigit(*it)) ++it;
+    return !(*a).empty() && it == (*a).end(); //returns true if the string is only composed of digits char
+}
+
+bool compare_rows(std::string* a, std::string* b){
+    bool resp = false;
+    if(isRowNumber){
+        resp = stoi(*a)>stoi(*b);
+    }
+    else{
+        resp =(*a).compare(*b)>0;
+    }
+    delete(a); delete(b);
+    return resp;
+}
 //sort lines by their k-th elem // TODO: optimise memory usage
 int sort_map(std::map<int, std::string>* _hashmap){
     std::string temp;
@@ -102,13 +121,17 @@ int sort_map(std::map<int, std::string>* _hashmap){
         int j = i;
         elemjm1=&((*_hashmap).at(j-1)); // pointer to line j-1
         elemj=&((*_hashmap).at(j)); // pointer to line j
-        // while line j-1 is greater than line j (alphabetical comparison)
-        while(j > 0 && extract_row_elem(elemjm1).compare(extract_row_elem(elemj)) > 0 ){
+        // while elem k-th in line j-1 is greater than line j (alphabetical comparison)
+        while(j > 0 && compare_rows(extract_row_elem(elemjm1),extract_row_elem(elemj))){
             temp = *elemjm1;
             // swap the lines
-            std::cout<<"swap "<<*elemj<< " AND "<<temp<<std::endl;
-            (*_hashmap).insert(std::pair<int,std::string>(j-1,*elemj));
-            (*_hashmap).insert(std::pair<int,std::string>(j,temp));
+            std::cout<<"hey"<<std::endl;
+            auto const result = (*_hashmap).insert(std::pair<int,std::string>(j-1,*elemj));
+            if (not result.second) { result.first->second = *elemj; }
+
+            auto const results2 = (*_hashmap).insert(std::pair<int,std::string>(j,temp));
+            if (not results2.second) { results2.first->second = temp; }
+
             j-=1;
             if(j>0){
                 elemjm1=&((*_hashmap).at(j-1)); // pointer to line j-1
@@ -127,6 +150,10 @@ int read_line(){
     int count = 0;
     while (!stream->end_of_stream()) {
         std::string line = stream->readln();
+        if(count==0 and output_count==1){
+            std::string *temp = extract_row_elem(&line);
+            isRowNumber = is_number(temp);
+        }
         u_int32_t string_size = line.length();
         if (!line.empty()) {
             if (size + string_size < in_M) { // if the capacity isn't exceeded
