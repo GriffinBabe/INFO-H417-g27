@@ -94,7 +94,7 @@ void output_file(std::map<int, std::string>* _hashmap){
 
 //sort lines by their k-th elem // TODO: optimise memory usage
 int sort_map(std::map<int, std::string>* _hashmap){
-    std::string *temp;
+    std::string temp;
     std::string *elemjm1;
     std::string *elemj;
     //insertion sorting algorithm
@@ -104,11 +104,16 @@ int sort_map(std::map<int, std::string>* _hashmap){
         elemj=&((*_hashmap).at(j)); // pointer to line j
         // while line j-1 is greater than line j (alphabetical comparison)
         while(j > 0 && extract_row_elem(elemjm1).compare(extract_row_elem(elemj)) > 0 ){
-            temp = elemjm1;
+            temp = *elemjm1;
             // swap the lines
+            std::cout<<"swap "<<*elemj<< " AND "<<temp<<std::endl;
             (*_hashmap).insert(std::pair<int,std::string>(j-1,*elemj));
-            (*_hashmap).insert(std::pair<int,std::string>(j,*temp));
+            (*_hashmap).insert(std::pair<int,std::string>(j,temp));
             j-=1;
+            if(j>0){
+                elemjm1=&((*_hashmap).at(j-1)); // pointer to line j-1
+                elemj=&((*_hashmap).at(j)); // pointer to line j
+            }
         }
     }
 }
