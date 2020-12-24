@@ -42,12 +42,25 @@ int merge::Entry::compare(int field, const Entry& other) const
     auto const& this_field = _elements.at(field);
     auto const& other_field = other._elements.at(field);
 
-    try {
+    // check if number or string
+    bool is_number = true;
+    std::string::const_iterator it = this_field.begin();
+    while (it != this_field.end()) {
+        if (!std::isdigit(*it)) {
+            is_number = false;
+            break;
+        }
+        it++;
+    }
+
+    if (is_number) {
+        // compare number
         int this_int = std::atoi(this_field.c_str());
         int other_int = std::atoi(this_field.c_str());
         return this_int < other_int ? -1 : this_int == other_int ? 0 : 1;
     }
-    catch (std::invalid_argument const& exc) {
+    else {
+        // compare string
         return this_field < other_field ? -1 : this_field == other_field ? 0: 1;
     }
 }
