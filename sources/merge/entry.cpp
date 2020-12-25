@@ -1,66 +1,89 @@
 #include "merge/entry.hpp"
 #include <boost/algorithm/string.hpp>
-#include <locale>
 
-merge::Entry::Entry(std::string const& line)
+void merge::Entry::parse_from(const std::string& line, Header& header)
 {
-    parse_from(line);
-}
-
-void merge::Entry::parse_from(const std::string& line)
-{
+    _header = &header;
+    // if the header hasn't been set yet then
+    if (!_header->is_set) {
+        _header->set_header(line);
+    }
     // splits the line by comma and puts it in the _elements file
-    boost::split(_elements, line, boost::is_any_of(","));
+    // http://www.cplusplus.com/forum/general/235644/
+    std::string::size_type pos = 0, last_pos = 0, length = line.length();
+
+    using value_type = typename std::vector<std::string>::value_type;
+    using size_type = typename std::vector<std::string>::size_type;
+
+    while (last_pos < length + 1) {
+        pos = line.find_first_of(',', last_pos);
+        if (pos == std::string::npos) {
+            pos = length;
+        }
+
+        if (pos != last_pos) {
+            _elements.push_back(
+                value_type(line.data() + last_pos, (size_type) pos - last_pos));
+        }
+        last_pos = pos + 1;
+    }
+
     _rows = _elements.size();
 }
 
 std::uint32_t merge::Entry::size() const
 {
     std::uint32_t size = 0;
-    for (auto const& st : _elements) {
-        size += st.size(); // length of the string in bytes.
+    for (auto const& str : _elements) {
+        size += str.size();
     }
     return size;
 }
 
 std::string merge::Entry::to_string() const
 {
-    std::stringstream ss;
-    for (int i = 0; i < _elements.size(); i++) {
-        ss << _elements[i];
-        if (i != _elements.size()) {
-            ss << ",";
-        }
+    std::string this_string;
+    this_string.reserve(this->size());
+    for (auto const& str : _elements) {
+        this_string += str;
     }
-
-    return ss.str();
+    return this_string;
 }
 
-int merge::Entry::compare(int field, const Entry& other) const
+bool merge::Entry::compare(int field, const Entry& other) const
 {
     // get reference
     auto const& this_field = _elements.at(field);
     auto const& other_field = other._elements.at(field);
 
-    // check if number or string
-    bool is_number = true;
-    std::string::const_iterator it = this_field.begin();
-    while (it != this_field.end()) {
-        if (!std::isdigit(*it)) {
-            is_number = false;
-            break;
-        }
-        it++;
-    }
-
-    if (is_number) {
-        // compare number
-        int this_int = std::atoi(this_field.c_str());
-        int other_int = std::atoi(this_field.c_str());
-        return this_int < other_int ? -1 : this_int == other_int ? 0 : 1;
+    if (_header->is_int[field]) {
+        int fst = std::atoi(this_field.c_str());
+        int snd = std::atoi(other_field.c_str());
+        return (fst < snd);
     }
     else {
-        // compare string
-        return this_field < other_field ? -1 : this_field == other_field ? 0: 1;
+        return (this_field < other_field);
     }
+}
+
+void merge::Header::set_header(const std::string& str)
+{
+    std::vector<std::string> strings;
+    boost::split(strings, str, boost::is_any_of(","));
+
+    for (auto const& str : strings) {
+        bool is_number = true;
+        auto it = str.begin();
+        while (it != str.end()) {
+            if (!std::isdigit(*it)) {
+                is_number = false;
+                break;
+            }
+            it++;
+        }
+
+        is_int.push_back(is_number);
+    }
+
+    is_set = true;
 }

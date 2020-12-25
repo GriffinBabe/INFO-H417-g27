@@ -239,6 +239,8 @@ void save_to_file(std::unique_ptr<io::OutputStream>& stream,
                   std::string const& path,
                   std::vector<merge::Entry> const& entries)
 {
+    std::cout << "Saving " << entries.size() << " entries to file: " << path
+              << std::endl;
     // write sorted elements
     bool success = stream->create(path);
     assert(success);
@@ -258,6 +260,18 @@ void sort_entries(std::vector<merge::Entry>& entries)
               });
 }
 
+void insert_entry(std::vector<merge::Entry>& entries, merge::Entry& entry)
+{
+    // insert entries in a sorted way
+    auto it = std::upper_bound(entries.begin(),
+                               entries.end(),
+                               entry,
+                               [&](auto const& fst, auto const& snd) {
+                                   return fst.compare(kth_column, snd);
+                               });
+    entries.insert(it, entry);
+}
+
 void split_file(std::unique_ptr<io::InputStream>& in_stream,
                 std::unique_ptr<io::OutputStream>& out_stream,
                 std::queue<std::string>& sub_files)
@@ -272,12 +286,13 @@ void split_file(std::unique_ptr<io::InputStream>& in_stream,
     bool success = in_stream->open(input_file);
     assert(success);
 
-    merge::Entry entry;
+    merge::Header table_header;
     while (!in_stream->end_of_stream()) {
+        merge::Entry entry;
         std::string line = in_stream->readln();
 
         if (!line.empty()) {
-            entry.parse_from(line);
+            entry.parse_from(line, table_header);
             std::uint32_t entry_size = entry.size();
             if (used_memory + entry_size >= memory_size) {
                 // memory limit reached, writing to file before adding the
@@ -297,6 +312,7 @@ void split_file(std::unique_ptr<io::InputStream>& in_stream,
             }
             // adds the entry to the vector (memory buffers)
             entries.push_back(entry);
+            // insert_entry(entries, entry);
             used_memory += entry_size;
         }
     }
@@ -324,6 +340,8 @@ int main(int argc, char** argv)
     std::unique_ptr<io::InputStream> in_stream;
     std::unique_ptr<io::OutputStream> out_stream;
 
+    std::chrono::time_point start = std::chrono::system_clock::now();
+
     // initializes the streams DUH!
     initialize_streams(in_stream, out_stream);
 
@@ -333,6 +351,11 @@ int main(int argc, char** argv)
     // splits the main files in multiple temporary files and fills
     // the queue to those file paths.
     split_file(in_stream, out_stream, sub_files);
+
+    std::chrono::time_point end = std::chrono::system_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+    std::cout << " ------ Duration: " << dur.count() << "ms." << std::endl;
 
     return 0;
 }

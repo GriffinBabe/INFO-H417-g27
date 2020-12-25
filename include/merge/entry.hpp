@@ -1,8 +1,17 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <variant>
 
 namespace merge {
+
+struct Header {
+    bool is_set = false;
+
+    std::vector<bool> is_int;
+
+    void set_header(std::string const& str);
+};
 
 
 /**
@@ -18,17 +27,11 @@ public:
     Entry() = default;
 
     /**
-     * Constructor that calls the parse_from function directly inside.
-     * @param line
-     */
-    Entry(std::string const& line);
-
-    /**
      * Parses all the entry data from a file line and sets them in the _elements
      * vector.
      * @param line, the line to parse.
      */
-    void parse_from(std::string const& line);
+    void parse_from(std::string const& line, Header& header);
 
     /**
      * Get the size of the entry in bytes. This takes into account the size
@@ -51,7 +54,7 @@ public:
      *          0 if this == other
      *          1 if this > other
      */
-    int compare(int field, Entry const& other) const;
+    bool compare(int field, Entry const& other) const;
 
 private:
 
@@ -64,6 +67,11 @@ private:
      * The data of the entry.
      */
     std::vector<std::string> _elements;
+
+    /**
+     * Reference to the header.
+     */
+    Header* _header;
 
 };
 
