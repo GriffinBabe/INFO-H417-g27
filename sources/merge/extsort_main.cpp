@@ -469,11 +469,17 @@ int main(int argc, char** argv)
     initialize_stream(out_stream);
 
     // queue of all the temporary files
+    std::cout
+        << "------ Start splitting table in multiple sorted temporary files"
+        << std::endl;
     std::queue<std::string> sub_files;
+
 
     // splits the main files in multiple temporary files and fills
     // the queue to those file paths.
     split_file(in_stream, out_stream, sub_files, kth_column);
+
+    std::chrono::time_point end_split = std::chrono::system_clock::now();
     std::cout << "------ Temporary files created, start merging" << std::endl;
 
     // merges the temporary file in one final file.
@@ -481,9 +487,21 @@ int main(int argc, char** argv)
     merge_files(sub_files, temp_file_counter, kth_column, in_d);
 
     std::chrono::time_point end = std::chrono::system_clock::now();
+
+    // Prints total duration
     std::chrono::duration<double> duration = end - start;
     auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-    std::cout << " ------ Duration: " << dur.count() << "ms." << std::endl;
+    std::cout << "\n ------ Total Duration: " << dur.count() << "ms." << "\n" << std::endl;
+
+    // Prints split phase duration
+    std::chrono::duration<double> split_duration = end_split - start;
+    dur = std::chrono::duration_cast<std::chrono::milliseconds>(split_duration);
+    std::cout << " ------ Split Duration: " << dur.count() << "ms." << std::endl;
+
+    // Prints merge phase duration
+    std::chrono::duration<double> merge_duration = end - end_split;
+    dur = std::chrono::duration_cast<std::chrono::milliseconds>(merge_duration);
+    std::cout << " ------ Merge Duration: " << dur.count() << "ms." << std::endl;
 
     return 0;
 }
