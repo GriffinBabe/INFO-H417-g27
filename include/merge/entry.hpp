@@ -5,6 +5,10 @@
 
 namespace merge {
 
+/**
+ * A little utility structure that register if a row is a real string or can be
+ * interpreted as an integer.
+ */
 struct Header {
     bool is_set = false;
 
@@ -71,7 +75,7 @@ private:
     /**
      * Reference to the header.
      */
-    Header* _header;
+    Header* _header = nullptr;
 
 };
 

@@ -44,8 +44,11 @@ std::string merge::Entry::to_string() const
 {
     std::string this_string;
     this_string.reserve(this->size());
-    for (auto const& str : _elements) {
-        this_string += str;
+    for (int i = 0; i < _elements.size(); i++) {
+        this_string += _elements[i];
+        if (i != _elements.size() - 1) {
+            this_string += ",";
+        }
     }
     return this_string;
 }

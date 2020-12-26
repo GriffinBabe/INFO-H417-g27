@@ -10,6 +10,7 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <queue>
+#include <stdio.h>
 
 namespace po = boost::program_options;
 
@@ -122,38 +123,50 @@ int parse_arguments(int argc, char** argv)
 
         if (vm.count("si")) {
             input_type = SIMPLE;
+            std::cout << "Using SimpleInputStream." << std::endl;
         }
-
-        if (vm.count("fi")) {
+        else if (vm.count("fi")) {
             input_type = STDIO;
+            std::cout << "Using StdioInputStream." << std::endl;
         }
-
-        if (vm.count("bi")) {
+        else if (vm.count("bi")) {
             input_type = BUFFERED;
             input_stream_size = vm["bi"].as<int>();
+            std::cout << "Using BufferedInputStream. Buffer: "
+                      << input_stream_size << " bytes.";
         }
-
-        if (vm.count("mi")) {
+        else if (vm.count("mi")) {
             input_type = MMAP;
             input_stream_size = vm["mi"].as<int>();
+            std::cout << "Using MMapInputStream. Mapping region: "
+                      << input_stream_size << " bytes.";
+        }
+        else {
+            std::cout << "Using StdioInputStream." << std::endl;
         }
 
         if (vm.count("so")) {
             output_type = SIMPLE;
+            std::cout << "Using SimpleOutputStream." << std::endl;
         }
-
-        if (vm.count("fo")) {
+        else if (vm.count("fo")) {
             output_type = STDIO;
+            std::cout << "Using StdioOutputStream." << std::endl;
         }
-
-        if (vm.count("bo")) {
+        else if (vm.count("bo")) {
             output_type = BUFFERED;
             output_stream_size = vm["bo"].as<int>();
+            std::cout << "Using BufferedOutputStream. Buffer: "
+                      << output_stream_size << " bytes." << std::endl;
         }
-
-        if (vm.count("mo")) {
+        else if (vm.count("mo")) {
             output_type = MMAP;
             output_stream_size = vm["mo"].as<int>();
+            std::cout << "Using MMapOutputStream. Mapping region: "
+                      << output_stream_size << " bytes." << std::endl;
+        }
+        else {
+            std::cout << "Using StdioOutputStream." << std::endl;
         }
 
         if (!vm.count("input-file")) {
@@ -191,46 +204,40 @@ int parse_arguments(int argc, char** argv)
     return 0;
 }
 
-void initialize_streams(std::unique_ptr<io::InputStream>& in_stream,
-                        std::unique_ptr<io::OutputStream>& out_stream)
+void initialize_stream(std::unique_ptr<io::InputStream>& in_stream)
 {
     switch (input_type) {
     case SIMPLE:
         in_stream = std::make_unique<io::SimpleInputStream>();
-        std::cout << "Using SimpleInputStream" << std::endl;
         break;
     case STDIO:
         in_stream = std::make_unique<io::StdioInputStream>();
-        std::cout << "Using StdioInputStream" << std::endl;
         break;
     case BUFFERED:
         in_stream =
             std::make_unique<io::BufferedInputStream>(input_stream_size);
-        std::cout << "Using BufferedInputStream" << std::endl;
         break;
     case MMAP:
         in_stream = std::make_unique<io::MMapInputStream>(input_stream_size);
-        std::cout << "Using MMapInputStream" << std::endl;
         break;
     }
+}
 
+void initialize_stream(std::unique_ptr<io::OutputStream>& out_stream)
+{
     switch (output_type) {
     case SIMPLE:
         out_stream = std::make_unique<io::SimpleOutputStream>();
-        std::cout << "Using SimpleOutputStream" << std::endl;
         break;
     case STDIO:
         out_stream = std::make_unique<io::StdioOutputStream>();
-        std::cout << "Using StdioOutputStream" << std::endl;
         break;
     case BUFFERED:
         out_stream =
             std::make_unique<io::BufferedOutputStream>(output_stream_size);
-        std::cout << "Using BufferedOutputStream" << std::endl;
         break;
     case MMAP:
         out_stream = std::make_unique<io::MMapOutputStream>(output_stream_size);
-        std::cout << "Using MMapOutputStream" << std::endl;
         break;
     }
 }
@@ -251,30 +258,37 @@ void save_to_file(std::unique_ptr<io::OutputStream>& stream,
     assert(success);
 }
 
-void sort_entries(std::vector<merge::Entry>& entries)
+void sort_entries(std::vector<merge::Entry>& entries, std::uint16_t k)
 {
     std::sort(entries.begin(),
               entries.end(),
               [&](const merge::Entry& fst, const merge::Entry& snd) {
-                  return fst.compare(kth_column, snd);
+                  return fst.compare(k, snd);
               });
 }
 
-void insert_entry(std::vector<merge::Entry>& entries, merge::Entry& entry)
+/**
+ * Sorts a deque of at most D entries.
+ *
+ * @param entries, the queue of entries to sort (the first element of the pair
+ *                 is not relevant in this function).
+ * @param k, the column to sort.
+ */
+void sort_entries(std::deque<std::pair<std::uint16_t, merge::Entry>>& entries,
+                  std::uint16_t k)
 {
-    // insert entries in a sorted way
-    auto it = std::upper_bound(entries.begin(),
-                               entries.end(),
-                               entry,
-                               [&](auto const& fst, auto const& snd) {
-                                   return fst.compare(kth_column, snd);
-                               });
-    entries.insert(it, entry);
+    std::sort(entries.begin(),
+              entries.end(),
+              [&](std::pair<std::uint16_t, merge::Entry> const& fst,
+                  std::pair<std::uint16_t, merge::Entry> const& snd) {
+                  return fst.second.compare(k, snd.second);
+              });
 }
 
 void split_file(std::unique_ptr<io::InputStream>& in_stream,
                 std::unique_ptr<io::OutputStream>& out_stream,
-                std::queue<std::string>& sub_files)
+                std::queue<std::string>& sub_files,
+                std::uint16_t k_th)
 {
     std::uint32_t used_memory = 0;
 
@@ -304,7 +318,7 @@ void split_file(std::unique_ptr<io::InputStream>& in_stream,
                 sub_files.push(temp_path);
 
                 // sort the entries and write to file
-                sort_entries(entries);
+                sort_entries(entries, k_th);
                 save_to_file(out_stream, temp_path, entries);
                 // clearing memory counter and entry array
                 used_memory = 0;
@@ -312,7 +326,6 @@ void split_file(std::unique_ptr<io::InputStream>& in_stream,
             }
             // adds the entry to the vector (memory buffers)
             entries.push_back(entry);
-            // insert_entry(entries, entry);
             used_memory += entry_size;
         }
     }
@@ -325,10 +338,119 @@ void split_file(std::unique_ptr<io::InputStream>& in_stream,
         sub_files.push(temp_path);
 
         // sort the entries and write to file.
-        sort_entries(entries);
+        sort_entries(entries, k_th);
         save_to_file(out_stream, temp_path, entries);
         entries.clear();
     }
+}
+
+void merge_files(std::queue<std::string>& queue,
+                 std::uint32_t& out_file_counter,
+                 std::uint16_t k_th,
+                 std::uint16_t d)
+{
+    // if there is only one file remaining
+    if (queue.size() <= 1) {
+        std::cout << "Merge sort finished, output in file: " << queue.front()
+                  << std::endl;
+        return;
+    }
+
+    std::queue<std::string> out_queue;
+
+    // utility to increase sort speed.
+    merge::Header header;
+
+    // take the first D elements of the queue and starts reading them
+    while (!queue.empty()) {
+        // takes at most d files (less if there are less than d available files
+        // to merge).
+        std::uint16_t opened_files = (queue.size() < d) ? queue.size() : d;
+
+        // Temporary treated merge files, will be deleted at the end of the
+        // function
+        std::vector<std::string> treated_merge_files;
+
+        // if there is only one file opened then put it to the out queue
+        // and forwards it in the next iteration of merge_files
+        // (little optimization)
+        if (d == 1) {
+            out_queue.push(queue.front());
+            queue.pop();
+            break;
+        }
+
+        std::vector<std::unique_ptr<io::InputStream>> input_streams(
+            opened_files);
+        std::unique_ptr<io::OutputStream> output_stream;
+
+        // initializes and opens the input stream
+        for (auto& input : input_streams) {
+            initialize_stream(input);
+            bool success = input->open(queue.front());
+            treated_merge_files.push_back(queue.front());
+            assert(success);
+            queue.pop();
+        }
+
+        // initializes output stream and creates new file
+        initialize_stream(output_stream);
+        std::string temp_path = temp_file_path_prefix
+                                + std::to_string(out_file_counter++)
+                                + temp_file_path_suffix;
+        bool success = output_stream->create(temp_path);
+        out_queue.push(temp_path);
+
+        // vector containing all the entries to merge
+        std::deque<std::pair<std::uint16_t, merge::Entry>> to_merge_entries;
+
+        // for each stream reads the initial line, parses the entry and add
+        // it to the entry merge queue
+        for (std::uint16_t i = 0; i < input_streams.size(); i++) {
+            // reads line and parses it as an entry, then adds it to a queue
+            merge::Entry entry;
+            std::string line = input_streams[i]->readln();
+            if (!line.empty()) {
+                entry.parse_from(line, header);
+                to_merge_entries.emplace_back(i, entry);
+            }
+        }
+
+        // merges the files by:
+        // 1) sorting the entries
+        // 2) writing the first entry to the output file,
+        // 3) reading and adding a new entry from the queue
+        // with the input stream of the entry that was just printed.
+        while (!to_merge_entries.empty()) {
+            sort_entries(to_merge_entries, k_th);
+            std::pair<std::uint16_t, merge::Entry> top_entry =
+                to_merge_entries.front();
+            output_stream->writeln(top_entry.second.to_string());
+            to_merge_entries.pop_front();
+
+            if (!input_streams[top_entry.first]->end_of_stream()) {
+                merge::Entry new_entry;
+                std::string line = input_streams[top_entry.first]->readln();
+                if (!line.empty()) {
+                    new_entry.parse_from(line, header);
+                    to_merge_entries.emplace_back(top_entry.first, new_entry);
+                }
+            }
+        }
+
+        // at this point all the lines of the d files have been merged
+        success = output_stream->close();
+        assert(success);
+
+        // deletes the temporary merge files
+        for (auto const& str : treated_merge_files) {
+            bool success = remove(str.c_str());
+            assert((success == 0));
+        }
+    }
+
+    // next step of merge
+    merge_files(out_queue, out_file_counter, k_th, d);
 }
 
 int main(int argc, char** argv)
@@ -343,14 +465,20 @@ int main(int argc, char** argv)
     std::chrono::time_point start = std::chrono::system_clock::now();
 
     // initializes the streams DUH!
-    initialize_streams(in_stream, out_stream);
+    initialize_stream(in_stream);
+    initialize_stream(out_stream);
 
     // queue of all the temporary files
     std::queue<std::string> sub_files;
 
     // splits the main files in multiple temporary files and fills
     // the queue to those file paths.
-    split_file(in_stream, out_stream, sub_files);
+    split_file(in_stream, out_stream, sub_files, kth_column);
+    std::cout << "------ Temporary files created, start merging" << std::endl;
+
+    // merges the temporary file in one final file.
+    std::uint32_t temp_file_counter = sub_files.size();
+    merge_files(sub_files, temp_file_counter, kth_column, in_d);
 
     std::chrono::time_point end = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = end - start;
