@@ -180,8 +180,8 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 			}
 			else
 			{ // Char is not found
-				if ( next_mapping() ) // If mapping the next region is possible
-				{// Neither the first mapped region nor the last
+				if (_actual_offset + _mapping_size <= _file_size - 1)
+				{
 					added_size = _mapping_size;
 					char_temp = new char[content_size];
 					std::memcpy(char_temp, content, content_size);
@@ -191,10 +191,11 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 					content = new char[content_size];
 					std::memcpy(content, char_temp, previous_size);
 					delete[] char_temp;
-					memset(&(content[content_size-1]), '\0', 1);
-					std::memcpy(&(content[previous_size]),
+					memset(content+content_size-1, '\0', 1);
+					std::memcpy(content+previous_size,
 								_address,
 								added_size);
+					next_mapping();
 				}
 				else // Otherwise stop here
 					break;
@@ -211,16 +212,17 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 			}
 			else
 			{
-				if ( next_mapping() ) // If mapping next region is possible
-				{// If the first mapped region but not the last
+				if (_actual_offset + _mapping_size <= _file_size - 1)
+				{
 					added_size = _mapping_size - _cursor;
 					added_size += 1;
 					content_size += added_size;
 					content = new char[content_size];
-					memset(&(content[content_size-1]), '\0', 1);
+					memset(content+content_size-1, '\0', 1);
 					std::memcpy(content,
 						   _address + _cursor,
 						   content_size-1);
+					next_mapping();
 					first_pass = false;
 				}
 				else // Otherwise stop here
@@ -263,7 +265,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 		added_size += 1;
 		content_size += added_size;
 		content = new char[content_size];
-		memset(&(content[content_size-1]), '\0', 1);
+		memset(content+content_size-1, '\0', 1);
 		std::memcpy(content,
 			   _address + _cursor,
 			   content_size - 1);
@@ -278,8 +280,8 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 		content = new char[content_size];
 		std::memcpy(content, char_temp, previous_size);
 		delete[] char_temp;
-		memset(&(content[content_size-1]), '\0', 1);
-		std::memcpy(&(content[previous_size]),
+		memset(content+content_size-1, '\0', 1);
+		std::memcpy(content+previous_size,
 			   _address,
 			   end_cursor);
 	}
