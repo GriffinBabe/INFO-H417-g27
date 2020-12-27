@@ -53,7 +53,7 @@ std::string io::MMapInputStream::readln()
 
 bool io::MMapInputStream::seek(std::uint32_t pos)
 {
-	return _mapping_handler.seek(pos);
+    return _mapping_handler.seek(pos);
 }
 
 bool io::MMapInputStream::end_of_stream() const
@@ -119,8 +119,8 @@ void io::MMapInputStream::MappingHandler::check_remap()
 
 void io::MMapInputStream::MappingHandler::check_eof()
 {
-	if (_cursor + _actual_offset >= _file_size )
-		_eof = true;
+    if (_cursor + _actual_offset >= _file_size )
+        _eof = true;
 }
 
 void io::MMapInputStream::MappingHandler::reset_vars()
@@ -160,80 +160,80 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     bool first_pass = true; // for the do-while, != behavior if true
     bool is_found = false; // indicate if found the character c
     char* char_ptr = nullptr; // pointer to the address of c
-	char* content = nullptr;
-	char* char_temp = nullptr;
-	uintmax_t content_size = 0;
-	uintmax_t previous_size = 0;
-	uintmax_t added_size = 0;
+    char* content = nullptr;
+    char* char_temp = nullptr;
+    uintmax_t content_size = 0;
+    uintmax_t previous_size = 0;
+    uintmax_t added_size = 0;
 
     // Search in the mapping of size _mapping_size if the character is present
     do
     {
         // If it is not the first pass, do not need to care about backup_cursor
         if (!first_pass)
-		{
+        {
             char_ptr = static_cast<char*>(
                 std::memchr(_address, c, _mapping_size));
-			if (char_ptr != nullptr) // Char is found
-			{
-				is_found = true;
-			}
-			else
-			{ // Char is not found
-				if (_actual_offset + _mapping_size <= _file_size - 1)
-				{
-					added_size = _mapping_size;
-					char_temp = new char[content_size];
-					std::memcpy(char_temp, content, content_size);
-					delete[] content;
-					previous_size = content_size-1;
-					content_size += added_size;
-					content = new char[content_size];
-					std::memcpy(content, char_temp, previous_size);
-					delete[] char_temp;
-					memset(content+content_size-1, '\0', 1);
-					std::memcpy(content+previous_size,
-								_address,
-								added_size);
-					next_mapping();
-				}
-				else // Otherwise stop here
-					break;
-			}
-		}
+            if (char_ptr != nullptr) // Char is found
+            {
+                is_found = true;
+            }
+            else
+            { // Char is not found
+                if (_actual_offset + _mapping_size <= _file_size - 1)
+                {
+                    added_size = _mapping_size;
+                    char_temp = new char[content_size];
+                    std::memcpy(char_temp, content, content_size);
+                    delete[] content;
+                    previous_size = content_size-1;
+                    content_size += added_size;
+                    content = new char[content_size];
+                    std::memcpy(content, char_temp, previous_size);
+                    delete[] char_temp;
+                    memset(content+content_size-1, '\0', 1);
+                    std::memcpy(content+previous_size,
+                                _address,
+                                added_size);
+                    next_mapping();
+                }
+                else // Otherwise stop here
+                    break;
+            }
+        }
         else
         { // If it is the first pass, take the _cursor into account
             char_ptr = static_cast<char*>(
                 std::memchr(_address + _cursor,
                             c, _mapping_size - _cursor));
-			if (char_ptr != nullptr) // Char is found
-			{
-				is_found = true;
-			}
-			else
-			{
-				if (_actual_offset + _mapping_size <= _file_size - 1)
-				{
-					added_size = _mapping_size - _cursor;
-					added_size += 1;
-					content_size += added_size;
-					content = new char[content_size];
-					memset(content+content_size-1, '\0', 1);
-					std::memcpy(content,
-						   _address + _cursor,
-						   content_size-1);
-					next_mapping();
-					first_pass = false;
-				}
-				else // Otherwise stop here
-					break;
-			}
+            if (char_ptr != nullptr) // Char is found
+            {
+                is_found = true;
+            }
+            else
+            {
+                if (_actual_offset + _mapping_size <= _file_size - 1)
+                {
+                    added_size = _mapping_size - _cursor;
+                    added_size += 1;
+                    content_size += added_size;
+                    content = new char[content_size];
+                    memset(content+content_size-1, '\0', 1);
+                    std::memcpy(content,
+                           _address + _cursor,
+                           content_size-1);
+                    next_mapping();
+                    first_pass = false;
+                }
+                else // Otherwise stop here
+                    break;
+            }
         }
 
     } while (not is_found);
 
     // Compute the position of the end cursor depending on the char pointer
-	// that was found and the address of the actual mapping
+    // that was found and the address of the actual mapping
     uintmax_t end_cursor = 0; // offset of desired char in last mapping
     if (char_ptr != nullptr)
         end_cursor = (uintmax_t) (char_ptr - _address);
@@ -245,13 +245,13 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
     {
         end_cursor = _file_size - 1 - _actual_offset;
         is_found = false;
-		_eof = true;
+        _eof = true;
     }
 
     // end_cursor - 1 to avoid counting "\n" as a "past character"
     added_size =  end_cursor - _cursor;
 
-	// If no chars were passed (instantaneously found a '\n'), then return
+    // If no chars were passed (instantaneously found a '\n'), then return
     if (content_size + added_size == 0)
     {
         _content = "";
@@ -260,60 +260,60 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
         return true;
     }
 
-	if ( first_pass )
-	{// If the first and last mapped region
-		added_size += 1;
-		content_size += added_size;
-		content = new char[content_size];
-		memset(content+content_size-1, '\0', 1);
-		std::memcpy(content,
-			   _address + _cursor,
-			   content_size - 1);
-	}
-	else
-	{ // If this is the last mapped region
-		char_temp = new char[content_size];
-		std::memcpy(char_temp, content, content_size);
-		delete[] content;
-		previous_size = content_size - 1;
-		content_size += end_cursor;
-		content = new char[content_size];
-		std::memcpy(content, char_temp, previous_size);
-		delete[] char_temp;
-		memset(content+content_size-1, '\0', 1);
-		std::memcpy(content+previous_size,
-			   _address,
-			   end_cursor);
-	}
+    if ( first_pass )
+    {// If the first and last mapped region
+        added_size += 1;
+        content_size += added_size;
+        content = new char[content_size];
+        memset(content+content_size-1, '\0', 1);
+        std::memcpy(content,
+               _address + _cursor,
+               content_size - 1);
+    }
+    else
+    { // If this is the last mapped region
+        char_temp = new char[content_size];
+        std::memcpy(char_temp, content, content_size);
+        delete[] content;
+        previous_size = content_size - 1;
+        content_size += end_cursor;
+        content = new char[content_size];
+        std::memcpy(content, char_temp, previous_size);
+        delete[] char_temp;
+        memset(content+content_size-1, '\0', 1);
+        std::memcpy(content+previous_size,
+               _address,
+               end_cursor);
+    }
 
-	// Update the cursor if the character was found
+    // Update the cursor if the character was found
     if (is_found)
         _cursor = end_cursor + 1;
 
-	// Check if a remap will be necessary
+    // Check if a remap will be necessary
     check_remap();
 
-	// Check if the current cursor is at the end of the file
-	check_eof();
+    // Check if the current cursor is at the end of the file
+    check_eof();
 
-	// Build the string instance and return it to _content
+    // Build the string instance and return it to _content
     _content = std::string(content);
-	delete[] content;
+    delete[] content;
     return is_found;
 }
 
 bool io::MMapInputStream::MappingHandler::seek(std::uint32_t pos)
 {
-	uintmax_t max_range = _actual_offset + _mapping_size;
-	if ( pos >= _actual_offset and pos < max_range )
-	{
-		_cursor = pos - _actual_offset;
-		return true;
-	}
-	else
-	{
-		return remap(pos);
-	}
+    uintmax_t max_range = _actual_offset + _mapping_size;
+    if ( pos >= _actual_offset and pos < max_range )
+    {
+        _cursor = pos - _actual_offset;
+        return true;
+    }
+    else
+    {
+        return remap(pos);
+    }
 }
 
 std::string io::MMapInputStream::MappingHandler::get_content()

@@ -73,7 +73,7 @@ private:
 
         /**
          * Read until the first instance of a character from the given 
-		 * position.
+         * position.
          * @param c, char to search
          * @return bool, if the char was found
          */
@@ -86,7 +86,7 @@ private:
          */
         bool seek(std::uint32_t pos);
 
-		/**
+        /**
          * Return content stored in the char array _content.
          * Content is mainly fed using read_until_char method.
          * @return characters stored in _content char array

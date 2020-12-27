@@ -136,30 +136,30 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
         first_size = _mapping_size - _flush_offset; // If 0, remap occurs.
         last_size = (length - first_size) % _mapping_size; // What exceeds
         complete_loops = (length - first_size - last_size) / _mapping_size;
-		// Number of loops using the complete mapping size
+        // Number of loops using the complete mapping size
     }
     else
-	{ // All fit in the current mapping
+    { // All fit in the current mapping
         first_size = length;
-	}
+    }
 
     { // Increase the size of the file to allow mapping. It has its own scope.
         std::filebuf fbuf;
         fbuf.open(_file_name, std::ios_base::in | std::ios_base::out);
         fbuf.pubseekoff(_actual_offset + _flush_offset + (length-1),
-						std::ios_base::beg);
+                        std::ios_base::beg);
         fbuf.sputc(0);
         fbuf.close();
     }
 
     if (first_size > 0)
     { // Copy everything that will fit in the current mapping
-		memcpy(_address, text, first_size);
-		if ( last_size or complete_loops) // Will only flush if region is full
-			_mapped_region.flush(_actual_offset, _mapping_size);
-			
+        memcpy(_address, text, first_size);
+        if ( last_size or complete_loops) // Will only flush if region is full
+            _mapped_region.flush(_actual_offset, _mapping_size);
+            
         _flush_offset += first_size;
-		_address += first_size;
+        _address += first_size;
     }
 
     for (int i = 0; i < complete_loops; i++)
@@ -170,7 +170,7 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
                _mapping_size);
         _mapped_region.flush(_flush_offset, _mapping_size);
         _flush_offset += _mapping_size;
-		_address += _mapping_size;
+        _address += _mapping_size;
     }
 
     if (last_size > 0)
@@ -180,9 +180,9 @@ bool io::MMapOutputStream::MappingHandler::writeln_text(const char *text)
                &(text[first_size + complete_loops*_mapping_size]),
                last_size);
         _flush_offset += last_size; // We only flush last_size chars
-		_address += last_size;
+        _address += last_size;
     }
-		
+        
     return true;
 }
 
