@@ -186,7 +186,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 					char_temp = new char[content_size];
 					std::memcpy(char_temp, content, content_size);
 					delete[] content;
-					previous_size = content_size;
+					previous_size = content_size-1;
 					content_size += added_size;
 					content = new char[content_size];
 					std::memcpy(content, char_temp, previous_size);
@@ -275,7 +275,7 @@ bool io::MMapInputStream::MappingHandler::read_until_char(char c)
 		char_temp = new char[content_size];
 		std::memcpy(char_temp, content, content_size);
 		delete[] content;
-		previous_size = content_size;
+		previous_size = content_size - 1;
 		content_size += end_cursor;
 		content = new char[content_size];
 		std::memcpy(content, char_temp, previous_size);
