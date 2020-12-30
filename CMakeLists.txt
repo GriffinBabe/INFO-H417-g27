@@ -21,7 +21,6 @@ if (${Boost_FOUND})
 else()
     message(FATAL_ERROR Couldn't find Boost)
 endif()
-
 # The directory of all includes. Will be accessible from everywhere in the cmake project and subprojects.
 include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})

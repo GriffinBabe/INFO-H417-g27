@@ -21,10 +21,16 @@ target_link_libraries(streams PUBLIC ${Boost_LIBRARIES}) # links boost libraries
 
 add_executable(
         length
-        performance/length_main.cpp
-)
+        performance/length_main.cpp)
 
 target_link_libraries(length PUBLIC streams ${Boost_LIBRARIES})
+
+add_executable(
+        extsort
+        merge/extsort_main.cpp
+        merge/entry.cpp)
+
+target_link_libraries(extsort PUBLIC streams ${Boost_LIBRARIES})
 
 add_executable(
         randjump
